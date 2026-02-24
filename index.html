@@ -6,30 +6,31 @@
     <title>A Dictionary of Color Combinations - Sanzo Wada</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+JP:wght@300;500;700&display=swap');
-        
         body {
-            font-family: 'Inter', 'Noto Sans JP', sans-serif;
-            background-color: #fdfdfc;
-            color: #1a1a1a;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #fafafa;
+            color: #111111;
             -webkit-tap-highlight-color: transparent;
         }
 
         .combination-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e5e5e5;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         @media (hover: hover) {
             .combination-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15);
+                border-color: #111111;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             }
         }
 
         .sticky-nav {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            background-color: rgba(253, 253, 252, 0.85);
+            background-color: rgba(250, 250, 250, 0.95);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e5e5e5;
         }
 
         ::-webkit-scrollbar {
@@ -37,14 +38,14 @@
             height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: #f5f5f5;
+            border-left: 1px solid #e5e5e5;
         }
         ::-webkit-scrollbar-thumb {
-            background: #d1d1d1;
-            border-radius: 4px;
+            background: #d4d4d4;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #a1a1a1;
+            background: #a3a3a3;
         }
 
         .hide-scrollbar::-webkit-scrollbar {
@@ -55,35 +56,80 @@
             scrollbar-width: none;
         }
 
+        .search-input {
+            border: 1px solid #e5e5e5;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease;
+        }
+        
         .search-input:focus {
             outline: none;
-            border-color: #a8a29e;
-            box-shadow: 0 0 0 2px rgba(168, 162, 158, 0.1);
+            border-color: #111111;
         }
 
-        .format-btn.active {
-            background-color: white;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            color: #1c1917;
+        /* Minimalist Buttons */
+        .sharp-btn {
+            border: 1px solid #e5e5e5;
+            background-color: #ffffff;
+            color: #737373;
+            transition: all 0.2s ease;
+        }
+        @media (hover: hover) {
+            .sharp-btn:hover {
+                border-color: #111111;
+                color: #111111;
+            }
+        }
+        .sharp-btn.active {
+            background-color: #111111;
+            border-color: #111111;
+            color: #ffffff;
         }
 
+        .view-tab {
+            border-bottom: 1px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.2s ease;
+            color: #737373;
+        }
         .view-tab.active {
-            border-bottom-color: #1c1917;
-            color: #1c1917;
+            color: #111111;
+            border-bottom-color: #111111;
+        }
+        .view-tab:not(.active):hover {
+            color: #111111;
+        }
+        
+        .swatch-overlay-enter {
+            animation: fadeIn 0.3s ease forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Forced White Overlays for crisp legibility against ANY background */
+        .text-overlay {
+            color: #ffffff !important;
+            text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.4);
+        }
+        .svg-overlay {
+            color: #ffffff !important;
+            filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.4));
         }
     </style>
 </head>
 <body class="antialiased flex flex-col min-h-screen">
 
     <!-- Header -->
-    <header class="pt-10 pb-8 px-4 md:pt-16 md:pb-12 md:px-6 max-w-7xl mx-auto w-full border-b border-stone-200">
-        <div class="flex flex-col xl:flex-row justify-between items-start gap-8">
+    <header class="pt-12 pb-10 px-4 md:pt-16 md:pb-12 md:px-8 w-full border-b border-zinc-200 bg-white">
+        <div class="max-w-7xl mx-auto flex flex-col xl:flex-row justify-between items-start gap-8">
             <div class="flex-1">
-                <h1 class="text-3xl md:text-5xl font-light tracking-tight mb-3 md:mb-4">
-                    配色事典 <span class="text-stone-400 font-extralight block md:inline text-xl md:text-4xl mt-1 md:mt-0">A Dictionary of Color Combinations</span>
+                <h1 class="text-3xl md:text-5xl font-medium tracking-tight mb-3">
+                    配色事典 <span class="text-zinc-400 font-light block md:inline text-xl md:text-3xl mt-1 md:mt-0 tracking-normal ml-0 md:ml-2">A Dictionary of Color Combinations</span>
                 </h1>
-                <p class="text-stone-500 max-w-2xl text-base md:text-lg font-light leading-relaxed">
-                    Updated with verified digital swatches from the <a href="#" onclick="openBioOverlay(event)" class="text-stone-800 font-medium underline underline-offset-4 decoration-stone-300 hover:decoration-stone-800 transition-colors cursor-pointer">Sanzo Wada</a> Archive. 
+                <p class="text-zinc-600 max-w-3xl text-sm leading-relaxed tracking-wide font-light">
+                    Updated with verified digital swatches from the Sanzo Wada Archive. <br/>
                     A compilation of 348 combinations capturing the aesthetic of the Taisho and Showa periods.
                 </p>
             </div>
@@ -91,15 +137,15 @@
     </header>
 
     <!-- Navigation / Filters / Search -->
-    <nav class="sticky top-0 z-40 sticky-nav border-b border-stone-100 py-3 px-4 md:py-4 md:px-6 mb-6 md:mb-8">
-        <div class="max-w-7xl mx-auto flex flex-col gap-4">
+    <nav class="sticky top-0 z-40 sticky-nav py-4 px-4 md:px-8 mb-8">
+        <div class="max-w-7xl mx-auto flex flex-col gap-6">
             
             <!-- View Tabs -->
-            <div class="flex gap-6 border-b border-stone-200 w-full overflow-x-auto hide-scrollbar">
-                <button onclick="switchView('combinations')" id="tab-combinations" class="view-tab active pb-3 border-b-2 border-transparent font-medium whitespace-nowrap transition-colors text-stone-400 hover:text-stone-700">Combinations</button>
-                <button onclick="switchView('colors')" id="tab-colors" class="view-tab pb-3 border-b-2 border-transparent font-medium whitespace-nowrap transition-colors text-stone-400 hover:text-stone-700">Individual Colors</button>
-                <button onclick="switchView('favorites')" id="tab-favorites" class="view-tab pb-3 border-b-2 border-transparent font-medium whitespace-nowrap transition-colors text-stone-400 hover:text-stone-700 flex items-center gap-1.5">
-                    Favorites <span id="fav-badge" class="bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full text-[10px] font-bold">0</span>
+            <div class="flex gap-6 border-b border-zinc-200 w-full overflow-x-auto hide-scrollbar pt-1">
+                <button onclick="switchView('combinations')" id="tab-combinations" class="view-tab active pb-3 text-xs uppercase tracking-widest font-medium whitespace-nowrap">Combinations</button>
+                <button onclick="switchView('colors')" id="tab-colors" class="view-tab pb-3 text-xs uppercase tracking-widest font-medium whitespace-nowrap">Individual Colors</button>
+                <button onclick="switchView('favorites')" id="tab-favorites" class="view-tab pb-3 text-xs uppercase tracking-widest font-medium whitespace-nowrap flex items-center gap-2">
+                    Favorites <span id="fav-badge" class="bg-zinc-100 text-zinc-500 px-1.5 py-0.5 text-[9px] border border-zinc-200 leading-none">0</span>
                 </button>
             </div>
 
@@ -108,66 +154,66 @@
                 <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto">
                     
                     <!-- Filters (Hidden in Colors view) -->
-                    <div id="combination-filters" class="flex gap-1 p-1 bg-stone-100 rounded-lg w-full sm:w-auto overflow-x-auto hide-scrollbar">
-                        <button onclick="filterType('all')" id="btn-all" class="filter-btn flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-colors bg-white shadow-sm text-stone-900 whitespace-nowrap active:scale-[0.98]">All</button>
-                        <button onclick="filterType('2')" id="btn-2" class="filter-btn flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-colors text-stone-500 hover:text-stone-900 whitespace-nowrap active:scale-[0.98]">2-Color</button>
-                        <button onclick="filterType('3')" id="btn-3" class="filter-btn flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-colors text-stone-500 hover:text-stone-900 whitespace-nowrap active:scale-[0.98]">3-Color</button>
-                        <button onclick="filterType('4')" id="btn-4" class="filter-btn flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-colors text-stone-500 hover:text-stone-900 whitespace-nowrap active:scale-[0.98]">4-Color</button>
+                    <div id="combination-filters" class="flex gap-2 w-full sm:w-auto overflow-x-auto hide-scrollbar">
+                        <button onclick="filterType('all')" id="btn-all" class="sharp-btn active filter-btn flex-1 sm:flex-none px-4 py-2 text-xs uppercase tracking-widest">All</button>
+                        <button onclick="filterType('2')" id="btn-2" class="sharp-btn filter-btn flex-1 sm:flex-none px-4 py-2 text-xs uppercase tracking-widest">2-Color</button>
+                        <button onclick="filterType('3')" id="btn-3" class="sharp-btn filter-btn flex-1 sm:flex-none px-4 py-2 text-xs uppercase tracking-widest">3-Color</button>
+                        <button onclick="filterType('4')" id="btn-4" class="sharp-btn filter-btn flex-1 sm:flex-none px-4 py-2 text-xs uppercase tracking-widest">4-Color</button>
                     </div>
 
                     <!-- Format Switcher -->
-                    <div class="flex gap-1 p-1 bg-stone-200/50 rounded-lg w-full sm:w-auto shrink-0">
-                        <button onclick="setFormat('hex')" id="fmt-hex" class="format-btn active flex-1 sm:flex-none px-3 py-1.5 md:py-2 rounded-md text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-all text-stone-500 active:scale-[0.98]">Hex</button>
-                        <button onclick="setFormat('rgb')" id="fmt-rgb" class="format-btn flex-1 sm:flex-none px-3 py-1.5 md:py-2 rounded-md text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-all text-stone-500 active:scale-[0.98]">RGB</button>
-                        <button onclick="setFormat('cmyk')" id="fmt-cmyk" class="format-btn flex-1 sm:flex-none px-3 py-1.5 md:py-2 rounded-md text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-all text-stone-500 active:scale-[0.98]">CMYK</button>
+                    <div class="flex gap-2 w-full sm:w-auto shrink-0">
+                        <button onclick="setFormat('hex')" id="fmt-hex" class="sharp-btn active format-btn flex-1 sm:flex-none px-3 py-2 text-[10px] uppercase tracking-widest">Hex</button>
+                        <button onclick="setFormat('rgb')" id="fmt-rgb" class="sharp-btn format-btn flex-1 sm:flex-none px-3 py-2 text-[10px] uppercase tracking-widest">RGB</button>
+                        <button onclick="setFormat('cmyk')" id="fmt-cmyk" class="sharp-btn format-btn flex-1 sm:flex-none px-3 py-2 text-[10px] uppercase tracking-widest">CMYK</button>
                     </div>
                     
                     <!-- Search Box -->
                     <div class="relative w-full sm:w-64">
-                        <input type="text" id="search-bar" oninput="handleSearch(this.value)" placeholder="Search names or No." 
-                               class="search-input w-full bg-stone-50 border border-stone-200 rounded-lg py-2 pl-9 pr-4 text-sm transition-all text-stone-800 placeholder-stone-400">
-                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+                        <input type="text" id="search-bar" oninput="handleSearch(this.value)" placeholder="SEARCH ID OR NAME" 
+                               class="search-input w-full py-2 pl-9 pr-4 text-xs tracking-wide text-zinc-900 placeholder-zinc-400">
+                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
                         </div>
                     </div>
                 </div>
 
-                <div class="text-xs md:text-sm text-stone-400 font-light hidden sm:block self-end lg:self-center shrink-0">
-                    Showing <span id="visible-count" class="font-medium text-stone-700">0</span>
+                <div class="text-[10px] text-zinc-500 uppercase tracking-widest hidden sm:block self-end lg:self-center shrink-0">
+                    Showing <span id="visible-count" class="font-medium text-zinc-900">0</span> items
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Grid -->
-    <main id="main-grid" class="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 pb-16">
+    <main id="main-grid" class="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pb-20">
         <!-- JS will populate cards here -->
     </main>
 
     <!-- Empty State -->
-    <div id="empty-state" class="hidden flex-1 text-center py-16 md:py-24 px-4 w-full">
-        <div class="text-stone-300 mb-4 flex justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" md:width="64" md:height="64" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+    <div id="empty-state" class="hidden flex-1 text-center py-24 px-4 w-full">
+        <div class="text-zinc-300 mb-6 flex justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
         </div>
-        <p class="text-stone-400 font-light text-sm md:text-base" id="empty-message">No results found.</p>
+        <p class="text-zinc-500 font-light text-lg tracking-wide" id="empty-message">No results found.</p>
     </div>
 
     <!-- Footer -->
-    <footer class="mt-auto border-t border-stone-200 py-8 bg-stone-50">
+    <footer class="mt-auto border-t border-zinc-200 py-8 bg-white">
         <div class="max-w-7xl mx-auto px-6 text-center">
-            <p class="text-stone-400 font-light text-sm flex items-center justify-center gap-1.5">
-                Made with <svg class="w-4 h-4 text-red-400 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg> by Abinesh
+            <p class="text-zinc-400 font-light text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                SYSTEM <span class="inline-block w-1.5 h-1.5 bg-zinc-300 rounded-full"></span> 2026
             </p>
         </div>
     </footer>
 
     <!-- Fullscreen Overlay -->
-    <div id="fullscreen-overlay" class="fixed inset-0 z-[100] hidden bg-stone-900 transition-all duration-300 opacity-0 pointer-events-none">
+    <div id="fullscreen-overlay" class="fixed inset-0 z-[100] hidden bg-white transition-opacity duration-300 opacity-0 pointer-events-none">
         <!-- Dynamic overlay content will be injected here -->
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 bg-stone-900 text-white px-5 py-3 rounded-full text-xs md:text-sm font-medium opacity-0 pointer-events-none transition-opacity shadow-xl z-[110] w-[90%] md:w-auto max-w-sm text-center">
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-zinc-900 text-white px-6 py-3 text-[10px] uppercase font-medium tracking-widest opacity-0 pointer-events-none transition-opacity z-[110] text-center shadow-lg">
         Copied to clipboard
     </div>
 
@@ -350,13 +396,13 @@
             COMBINATIONS.push({ id: i.toString().padStart(3, '0'), colors: colorIds, type });
         }
 
-        // Migration step: Safely upgrade legacy IDs to prefixed IDs for unified favorites
+        // Migration step
         let rawFavs = JSON.parse(localStorage.getItem('wada-favs') || '[]');
         let favorites = rawFavs.map(id => typeof id === 'string' && !id.includes('-') ? 'comb-' + id : id);
         localStorage.setItem('wada-favs', JSON.stringify(favorites));
 
         // Global State
-        let currentView = 'combinations'; // 'combinations', 'colors', 'favorites'
+        let currentView = 'combinations'; 
         let currentType = 'all'; 
         let currentSearch = '';
         let currentFormat = 'hex'; 
@@ -389,12 +435,12 @@
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            showToast(`Copied ${str}`);
+            showToast(`COPIED: ${str}`);
         }
 
         function getFormattedColor(rgb, format) {
             const [r, g, b] = rgb;
-            if (format === 'rgb') return `rgb(${r}, ${g}, ${b})`;
+            if (format === 'rgb') return `${r}, ${g}, ${b}`;
             if (format === 'hex') {
                 return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
             }
@@ -408,26 +454,21 @@
             }
         }
 
-        function getContrastYIQ(rgb) {
-            const [r, g, b] = rgb;
-            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-            return (yiq >= 128) ? '#1c1917' : '#ffffff'; 
-        }
-
         function toggleFavorite(type, id, event) {
             if(event) event.stopPropagation();
             const favKey = type + '-' + id;
             const index = favorites.indexOf(favKey);
             if (index > -1) {
                 favorites.splice(index, 1);
-                showToast(`Removed No. ${id} from favorites`);
+                showToast(`REMOVED NO. ${id}`);
             } else {
                 favorites.push(favKey);
-                showToast(`Added No. ${id} to favorites`);
+                showToast(`SAVED NO. ${id}`);
             }
             localStorage.setItem('wada-favs', JSON.stringify(favorites));
             updateFavBadge();
             render();
+            if(overlayHistory.length > 0) renderOverlay(); 
         }
 
         function updateFavBadge() {
@@ -437,12 +478,10 @@
         function switchView(view) {
             currentView = view;
             document.querySelectorAll('.view-tab').forEach(t => {
-                t.classList.remove('active', 'border-stone-900', 'text-stone-900');
-                t.classList.add('border-transparent', 'text-stone-400');
+                t.classList.remove('active');
             });
             const activeTab = document.getElementById(`tab-${view}`);
-            activeTab.classList.remove('border-transparent', 'text-stone-400');
-            activeTab.classList.add('active', 'border-stone-900', 'text-stone-900');
+            activeTab.classList.add('active');
 
             const filterGroup = document.getElementById('combination-filters');
             if(view === 'colors') {
@@ -456,13 +495,11 @@
         function filterType(typeStr) {
             currentType = String(typeStr);
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('bg-white', 'shadow-sm', 'text-stone-900');
-                btn.classList.add('text-stone-500');
+                btn.classList.remove('active');
             });
             const activeBtn = document.getElementById(`btn-${currentType}`);
             if (activeBtn) {
-                activeBtn.classList.add('bg-white', 'shadow-sm', 'text-stone-900');
-                activeBtn.classList.remove('text-stone-500');
+                activeBtn.classList.add('active');
             }
             render();
         }
@@ -483,34 +520,32 @@
         function createColorCard(c) {
             const isFav = favorites.includes('color-' + c.id);
             const codeValue = getFormattedColor(c.rgb, currentFormat);
-            const textColor = getContrastYIQ(c.rgb);
             
             const card = document.createElement('div');
-            card.className = 'combination-card flex flex-col h-48 md:h-64 rounded-xl overflow-hidden shadow-sm bg-white cursor-pointer group/card relative';
+            card.className = 'combination-card flex flex-col h-48 md:h-56 cursor-pointer group/card relative';
             
             const favBtn = document.createElement('button');
-            favBtn.className = `absolute top-3 left-3 z-10 p-2 rounded-full backdrop-blur-md bg-black/10 hover:bg-black/20 transition-all shadow-sm ${isFav ? 'opacity-100' : 'opacity-0 group-hover/card:opacity-100'}`;
+            favBtn.className = `absolute top-3 left-3 z-10 p-1.5 transition-opacity ${isFav ? 'opacity-100' : 'opacity-0 group-hover/card:opacity-100'}`;
             favBtn.onclick = (e) => toggleFavorite('color', c.id, e);
             favBtn.innerHTML = `
-                <svg class="w-4 h-4 ${isFav ? 'text-red-500 fill-current' : ''}" style="${!isFav ? 'color: ' + textColor : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="${isFav ? 'currentColor' : 'none'}">
+                <svg class="w-3.5 h-3.5 svg-overlay ${isFav ? 'fill-current' : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="${isFav ? 'currentColor' : 'none'}">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
             `;
             card.appendChild(favBtn);
 
             const cardWrapper = document.createElement('div');
-            cardWrapper.className = 'flex-1 p-4 flex flex-col justify-end relative transition-transform duration-300';
+            cardWrapper.className = 'flex-1 p-4 flex flex-col justify-end relative transition-colors';
             cardWrapper.style.backgroundColor = `rgb(${c.rgb.join(',')})`;
-            cardWrapper.style.color = textColor;
             cardWrapper.onclick = () => openColorOverlay(c.id);
             
             cardWrapper.innerHTML = `
-                <div class="flex justify-between items-end w-full">
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-lg md:text-xl font-bold tracking-wide leading-none drop-shadow-sm">${c.jp}</span>
-                        <span class="text-xs font-medium opacity-80 leading-none mt-1">${c.en}</span>
+                <div class="flex justify-between items-end w-full leading-none text-overlay">
+                    <div class="flex flex-col gap-1.5">
+                        <span class="text-lg md:text-xl font-medium tracking-tight">${c.jp}</span>
+                        <span class="text-[10px] uppercase font-medium tracking-widest">${c.en}</span>
                     </div>
-                    <span class="text-xs font-mono font-medium opacity-90 leading-none">${codeValue}</span>
+                    <span class="text-[10px] font-mono tracking-widest uppercase">${codeValue}</span>
                 </div>
             `;
             card.appendChild(cardWrapper);
@@ -520,13 +555,13 @@
         function createCombCard(comb) {
             const isFav = favorites.includes('comb-' + comb.id);
             const card = document.createElement('div');
-            card.className = 'combination-card flex flex-col h-72 md:h-96 rounded-xl overflow-hidden shadow-sm bg-white relative group/card';
+            card.className = 'combination-card flex flex-col h-64 md:h-80 relative group/card';
             
             const favBtn = document.createElement('button');
-            favBtn.className = `absolute top-3 left-3 z-10 p-2 rounded-full backdrop-blur-md bg-white/30 hover:bg-white/50 transition-all shadow-sm ${isFav ? 'opacity-100' : 'opacity-0 group-hover/card:opacity-100'}`;
+            favBtn.className = `absolute top-3 left-3 z-10 p-1.5 transition-opacity ${isFav ? 'opacity-100' : 'opacity-0 group-hover/card:opacity-100'}`;
             favBtn.onclick = (e) => toggleFavorite('comb', comb.id, e);
             favBtn.innerHTML = `
-                <svg class="w-4 h-4 ${isFav ? 'text-red-500 fill-current' : 'text-stone-800'}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="${isFav ? 'currentColor' : 'none'}">
+                <svg class="w-3.5 h-3.5 svg-overlay ${isFav ? 'fill-current' : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="${isFav ? 'currentColor' : 'none'}">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
             `;
@@ -539,12 +574,10 @@
             comb.colors.forEach((cid, index) => {
                 const c = COLORS[cid];
                 const codeValue = getFormattedColor(c.rgb, currentFormat);
-                const textColor = getContrastYIQ(c.rgb);
                 
                 const swatch = document.createElement('div');
-                swatch.className = 'flex-1 p-3 md:p-4 flex flex-col justify-end relative group/swatch cursor-pointer transition-all duration-300 ease-out hover:flex-[1.15] active:brightness-95';
+                swatch.className = `flex-1 p-3 flex flex-col justify-end relative cursor-pointer hover:flex-[1.1] transition-all duration-300 text-overlay`;
                 swatch.style.backgroundColor = `rgb(${c.rgb.join(',')})`;
-                swatch.style.color = textColor;
                 
                 swatch.onclick = (e) => {
                     e.stopPropagation();
@@ -552,20 +585,20 @@
                 };
                 
                 swatch.innerHTML = `
-                    <div class="flex justify-between items-end w-full">
-                        <div class="flex flex-col gap-0.5 pointer-events-none">
-                            <span class="text-sm md:text-base font-bold tracking-wide leading-none drop-shadow-sm">${c.jp}</span>
-                            <span class="text-[10px] md:text-[11px] font-medium opacity-75 leading-none">${c.en}</span>
+                    <div class="flex justify-between items-end w-full leading-none">
+                        <div class="flex flex-col gap-1 pointer-events-none">
+                            <span class="text-sm font-medium tracking-tight">${c.jp}</span>
+                            <span class="text-[9px] uppercase font-medium tracking-widest">${c.en}</span>
                         </div>
-                        <div class="flex flex-col items-end pointer-events-none">
-                            ${index === 0 ? `<span class="absolute top-3 md:top-4 right-3 md:right-4 text-[10px] font-bold tracking-widest opacity-60 uppercase">No. ${comb.id}</span>` : ''}
-                            <span class="text-[11px] md:text-xs font-mono font-medium opacity-90 transition-transform group-active/swatch:scale-95 leading-none">${codeValue}</span>
+                        <div class="flex flex-col items-end pointer-events-none gap-1">
+                            ${index === 0 ? `<span class="absolute top-3 right-3 text-[9px] font-medium tracking-widest text-overlay">NO. ${comb.id}</span>` : ''}
+                            <span class="text-[9px] font-mono tracking-widest uppercase mt-auto">${codeValue}</span>
                         </div>
                     </div>
                 `;
                 cardWrapper.appendChild(swatch);
             });
-            
+
             card.appendChild(cardWrapper);
             return card;
         }
@@ -610,14 +643,14 @@
                 });
             }
 
-            countSpan.innerText = renderedCount;
+            countSpan.innerText = String(renderedCount);
 
             if (renderedCount === 0) {
                 emptyState.classList.remove('hidden');
                 grid.classList.add('hidden');
-                if (currentView === 'favorites') emptyMessage.innerText = "You haven't added any favorites yet.";
+                if (currentView === 'favorites') emptyMessage.innerText = "No favorites saved.";
                 else if (currentView === 'colors') emptyMessage.innerText = "No individual colors found.";
-                else emptyMessage.innerText = "No combinations found for your search.";
+                else emptyMessage.innerText = "No combinations found.";
             } else {
                 emptyState.classList.add('hidden');
                 grid.classList.remove('hidden');
@@ -625,12 +658,6 @@
         }
 
         // --- Fullscreen Overlay Logic ---
-        function openBioOverlay(e) {
-            if (e) e.preventDefault();
-            overlayHistory.push({ type: 'bio' });
-            renderOverlay();
-        }
-
         function openColorOverlay(cid) {
             overlayHistory.push({ type: 'color', id: cid });
             renderOverlay();
@@ -657,6 +684,7 @@
             setTimeout(() => {
                 overlay.classList.add('hidden');
                 document.body.style.overflow = '';
+                overlay.innerHTML = ''; 
             }, 300);
         }
 
@@ -668,95 +696,63 @@
             
             requestAnimationFrame(() => {
                 overlay.classList.remove('opacity-0', 'pointer-events-none');
-                overlay.classList.add('opacity-100');
+                overlay.classList.add('opacity-100', 'swatch-overlay-enter');
             });
 
-            if (current.type === 'bio') {
-                overlay.innerHTML = `
-                    <div class="fixed inset-0 transition-colors duration-500 overflow-y-auto bg-stone-900/60 backdrop-blur-md flex items-center justify-center p-4">
-                        <div class="absolute top-0 left-0 right-0 z-50 p-4 md:p-6 flex gap-3 pointer-events-none">
-                            ${overlayHistory.length > 1 ? `
-                            <button onclick="overlayBack()" class="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-full bg-white hover:bg-stone-50 transition-colors text-sm font-medium shadow-sm text-stone-900">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg> Back
-                            </button>
-                            ` : ''}
-                            <button onclick="closeOverlay()" class="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-full bg-white hover:bg-stone-50 transition-colors text-sm font-medium ml-auto shadow-sm text-stone-900">
-                                Close <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
-                        </div>
-
-                        <div class="bg-white rounded-3xl max-w-4xl w-full overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[400px] my-auto mt-24 md:mt-auto relative z-10">
-                            <div class="md:w-2/5 bg-stone-200 relative shrink-0 h-64 md:h-auto">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Wada_Sanz%C5%8D.jpg" alt="Sanzo Wada" class="w-full h-full object-cover object-top grayscale opacity-90 absolute inset-0 mix-blend-multiply">
-                            </div>
-                            <div class="p-8 md:p-12 flex flex-col justify-center bg-white md:w-3/5">
-                                <h2 class="text-3xl md:text-5xl font-bold tracking-tight text-stone-900 mb-2">Sanzo Wada</h2>
-                                <span class="text-stone-400 font-mono text-sm tracking-widest mb-6 block">1883 &mdash; 1967</span>
-                                <div class="space-y-4 text-stone-600 leading-relaxed font-light text-sm md:text-base">
-                                    <p>Sanzo Wada was an active artist, art school instructor, costume designer for the movies and the theater, and kimono and fashion designer who employed his extensive and versatile talents to do innovative work that centered primarily on visual perception and form.</p>
-                                    <p>He laid the foundation for contemporary color research in Japan. The little-known classic <em>Haishoku Soukan</em> (1933–34) was the precursor of modern color samplers.</p>
-                                    <p>In 1954, Wada won the Academy Award for Best Costume Design for his work on the internationally acclaimed film <em>Gate of Hell</em>.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (current.type === 'color') {
+            if (current.type === 'color') {
                 const c = COLORS[current.id];
                 const bg = `rgb(${c.rgb.join(',')})`;
-                const textColor = getContrastYIQ(c.rgb);
                 const isFav = favorites.includes('color-' + current.id);
                 const relatedCombs = COMBINATIONS.filter(comb => comb.colors.includes(current.id));
                 const codeValue = getFormattedColor(c.rgb, currentFormat);
 
                 let combsHtml = relatedCombs.map(comb => `
-                    <button onclick="openCombinationOverlay('${comb.id}')" class="flex flex-col h-32 md:h-40 rounded-xl overflow-hidden shadow-lg border border-current/10 transition-transform hover:-translate-y-1 active:scale-95 text-left group">
-                        <div class="w-full flex justify-between p-3 bg-black/5 backdrop-blur-sm z-10 shrink-0">
-                            <span class="text-xs font-bold uppercase tracking-widest" style="color: ${textColor}">No. ${comb.id}</span>
+                    <button onclick="openCombinationOverlay('${comb.id}')" class="flex flex-col h-28 border border-white/20 transition-colors hover:border-white/50 text-left group bg-transparent w-full">
+                        <div class="w-full flex justify-between p-2 shrink-0">
+                            <span class="text-[9px] uppercase tracking-widest text-overlay" style="opacity: 0.8;">NO. ${comb.id}</span>
                         </div>
-                        <div class="flex flex-1 w-full">
-                            ${comb.colors.map(colorId => `<div class="flex-1 h-full" style="background-color: rgb(${COLORS[colorId].rgb.join(',')})"></div>`).join('')}
+                        <div class="flex flex-1 w-full pb-2 px-2 gap-0.5">
+                            ${comb.colors.map(colorId => `<div class="flex-1 h-full" style="background-color: rgb(${COLORS[colorId].rgb.join(',')});"></div>`).join('')}
                         </div>
                     </button>
                 `).join('');
 
                 overlay.innerHTML = `
-                    <div class="fixed inset-0 transition-colors duration-500 overflow-y-auto" style="background-color: ${bg}; color: ${textColor}">
+                    <div class="absolute inset-0 overflow-y-auto" style="background-color: ${bg};">
                         <!-- Top Navigation Actions -->
-                        <div class="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 flex gap-3 pointer-events-none">
-                            <button onclick="overlayBack()" class="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-full bg-black/10 hover:bg-black/20 backdrop-blur-md transition-colors text-sm font-medium">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg> Back
+                        <div class="fixed top-0 left-0 right-0 z-50 p-6 md:px-8 flex gap-4 pointer-events-none text-overlay">
+                            <button onclick="overlayBack()" class="pointer-events-auto flex items-center gap-2 py-2 text-[10px] tracking-widest uppercase hover:opacity-75 transition-opacity">
+                                <svg class="w-3.5 h-3.5 svg-overlay" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg> Back
                             </button>
                             
-                            <button onclick="toggleFavorite('color', '${current.id}', event); renderOverlay()" class="pointer-events-auto ml-auto p-2.5 rounded-full bg-black/10 hover:bg-black/20 backdrop-blur-md transition-colors shadow-sm group border border-black/5">
-                                <svg class="w-5 h-5 ${isFav ? 'text-red-500 fill-current' : ''}" style="${!isFav ? 'color: ' + textColor : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="${isFav ? 'currentColor' : 'none'}">
+                            <button onclick="toggleFavorite('color', '${current.id}', event)" class="pointer-events-auto ml-auto p-2 hover:opacity-75 transition-opacity">
+                                <svg class="w-4 h-4 svg-overlay ${isFav ? 'fill-current' : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="${isFav ? 'currentColor' : 'none'}">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                             </button>
 
-                            <button onclick="closeOverlay()" class="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-full bg-black/10 hover:bg-black/20 backdrop-blur-md transition-colors text-sm font-medium">
-                                <span class="hidden sm:block">Close</span> <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            <button onclick="closeOverlay()" class="pointer-events-auto flex items-center gap-2 py-2 text-[10px] tracking-widest uppercase hover:opacity-75 transition-opacity">
+                                <span class="hidden sm:block">Close</span> <svg class="w-3.5 h-3.5 svg-overlay" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
                         
-                        <div class="min-h-full flex flex-col p-6 max-w-6xl mx-auto w-full pt-28 md:pt-40 pb-20">
+                        <div class="min-h-full flex flex-col p-6 md:p-12 max-w-6xl mx-auto w-full pt-32 md:pt-48 pb-20 text-overlay">
                             <!-- Header Data -->
                             <div class="mb-16 md:mb-24">
-                                <h2 class="text-6xl md:text-8xl lg:text-[10rem] font-bold tracking-tighter mb-4 md:mb-6 drop-shadow-sm leading-none">${c.jp}</h2>
-                                <p class="text-2xl md:text-5xl opacity-90 font-light mb-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
+                                <h2 class="text-5xl md:text-[6rem] lg:text-[8rem] font-medium tracking-tight mb-4 leading-none">${c.jp}</h2>
+                                <p class="text-lg md:text-3xl font-light mb-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 tracking-wide uppercase">
                                     <span>${c.en}</span> 
-                                    <span class="hidden sm:inline opacity-50">&mdash;</span> 
-                                    <span class="font-mono text-xl md:text-4xl opacity-75 cursor-pointer" onclick="copyToClipboard('${codeValue}')">${codeValue}</span>
+                                    <span class="hidden sm:inline">&mdash;</span> 
+                                    <span class="font-mono cursor-pointer transition-opacity hover:opacity-80" onclick="copyToClipboard('${codeValue}')">${codeValue}</span>
                                 </p>
                             </div>
                             
                             <!-- Hyperlinks / Related Combinations -->
                             <div class="w-full mt-auto">
-                                <h3 class="text-sm md:text-base opacity-70 mb-6 uppercase tracking-widest border-b border-current/20 pb-3 flex items-center gap-3">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                <h3 class="text-[10px] md:text-xs font-medium mb-6 tracking-widest border-b border-white/30 pb-3 flex items-center gap-3 uppercase">
                                     Appears in ${relatedCombs.length} Combinations
                                 </h3>
-                                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+                                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
                                     ${combsHtml}
                                 </div>
                             </div>
@@ -767,42 +763,41 @@
                 const comb = COMBINATIONS.find(c => c.id === current.id);
                 const isFav = favorites.includes('comb-' + comb.id);
                 
-                let bgHtml = comb.colors.map(colorId => {
+                let bgHtml = comb.colors.map((colorId, idx) => {
                     const c = COLORS[colorId];
-                    const textColor = getContrastYIQ(c.rgb);
                     return `
-                    <div class="flex-1 h-full flex flex-col justify-end p-6 md:p-12 transition-all duration-500 hover:flex-[1.2] cursor-pointer" onclick="openColorOverlay('${c.id}')" style="background-color: rgb(${c.rgb.join(',')}); color: ${textColor}">
-                        <div class="opacity-0 md:opacity-100 flex flex-col gap-2 transition-transform active:scale-95">
-                            <span class="text-3xl lg:text-5xl font-bold tracking-tight">${c.jp}</span>
-                            <span class="text-lg lg:text-xl opacity-80">${c.en}</span>
-                            <span class="text-sm lg:text-base font-mono mt-2 opacity-60">${getFormattedColor(c.rgb, currentFormat)}</span>
+                    <div class="flex-1 h-full flex flex-col justify-end p-6 md:p-12 cursor-pointer transition-all duration-500 hover:flex-[1.1] text-overlay" onclick="openColorOverlay('${c.id}')" style="background-color: rgb(${c.rgb.join(',')});">
+                        <div class="flex flex-col gap-1 transition-transform active:scale-95 leading-none">
+                            <span class="text-3xl lg:text-5xl font-medium tracking-tight">${c.jp}</span>
+                            <span class="text-sm lg:text-base font-medium tracking-widest uppercase">${c.en}</span>
+                            <span class="text-[10px] lg:text-xs font-mono mt-3 tracking-widest uppercase">${getFormattedColor(c.rgb, currentFormat)}</span>
                         </div>
                     </div>`;
                 }).join('');
                 
                 overlay.innerHTML = `
-                    <div class="fixed inset-0 flex flex-col md:flex-row transition-all duration-500 bg-stone-900">
+                    <div class="absolute inset-0 flex flex-col md:flex-row bg-white">
                         ${bgHtml}
                         
-                        <!-- Overlay Title (Blend mode for contrast across stripes) -->
-                        <div class="absolute inset-0 pointer-events-none flex flex-col justify-center items-center p-6 text-white mix-blend-difference z-10">
-                            <h2 class="text-[5rem] md:text-[8rem] lg:text-[12rem] font-bold tracking-tighter opacity-90 drop-shadow-2xl">No. ${comb.id}</h2>
+                        <!-- Overlay Title -->
+                        <div class="absolute inset-0 pointer-events-none flex flex-col justify-center items-center p-6 z-10 text-overlay">
+                            <h2 class="text-6xl md:text-[8rem] lg:text-[12rem] font-medium tracking-tighter leading-none">NO. ${comb.id}</h2>
                         </div>
 
                         <!-- Top Navigation Actions -->
-                        <div class="absolute top-0 left-0 right-0 z-50 p-4 md:p-6 flex gap-3 pointer-events-none">
-                            <button onclick="overlayBack()" class="pointer-events-auto flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md transition-colors text-white text-sm font-medium shadow-sm border border-white/10">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg> Back
+                        <div class="absolute top-0 left-0 right-0 z-50 p-6 md:px-8 flex gap-4 pointer-events-none text-overlay">
+                            <button onclick="overlayBack()" class="pointer-events-auto flex items-center gap-2 py-2 text-[10px] tracking-widest uppercase hover:opacity-75 transition-opacity">
+                                <svg class="w-3.5 h-3.5 svg-overlay" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg> Back
                             </button>
                             
-                            <button onclick="toggleFavorite('comb', '${comb.id}', event); renderOverlay()" class="pointer-events-auto ml-auto p-2.5 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md transition-colors shadow-sm border border-white/10 group">
-                                <svg class="w-5 h-5 ${isFav ? 'text-red-400 fill-current' : 'text-white group-hover:text-red-300'}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="${isFav ? 'currentColor' : 'none'}">
+                            <button onclick="toggleFavorite('comb', '${comb.id}', event)" class="pointer-events-auto ml-auto p-2 hover:opacity-75 transition-opacity">
+                                <svg class="w-4 h-4 svg-overlay ${isFav ? 'fill-current' : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="${isFav ? 'currentColor' : 'none'}">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                             </button>
 
-                            <button onclick="closeOverlay()" class="pointer-events-auto p-2.5 px-4 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md transition-colors shadow-sm border border-white/10 text-white flex items-center gap-2 font-medium text-sm">
-                                <span class="hidden sm:block">Close</span> <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            <button onclick="closeOverlay()" class="pointer-events-auto flex items-center gap-2 py-2 text-[10px] tracking-widest uppercase hover:opacity-75 transition-opacity">
+                                <span class="hidden sm:block">Close</span> <svg class="w-3.5 h-3.5 svg-overlay" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
                     </div>
