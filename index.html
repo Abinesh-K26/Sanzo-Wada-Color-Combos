@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A Dictionary of Color Combinations - Sanzo Wada</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+JP:wght@300;500;700&display=swap');
+        
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #fdfdfc;
+            color: #1a1a1a;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .swatch-shadow {
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+        }
+
+        .combination-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        @media (hover: hover) {
+            .combination-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        .sticky-nav {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background-color: rgba(253, 253, 252, 0.85);
+        }
+
+        /* Scrollbar styling for desktop */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d1d1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        /* Hide scrollbar for horizontal mobile scroll areas */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #a8a29e;
+            box-shadow: 0 0 0 2px rgba(168, 162, 158, 0.1);
+        }
+
+        .format-btn.active {
+            background-color: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            color: #1c1917;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="pt-10 pb-8 px-4 md:pt-16 md:pb-12 md:px-6 max-w-7xl mx-auto border-b border-stone-200">
+        <h1 class="text-3xl md:text-5xl font-light tracking-tight mb-3 md:mb-4">
+            配色事典 <span class="text-stone-400 font-extralight block md:inline text-xl md:text-4xl mt-1 md:mt-0">A Dictionary of Color Combinations</span>
+        </h1>
+        <p class="text-stone-500 max-w-2xl text-base md:text-lg font-light leading-relaxed">
+            Updated with verified digital swatches from the <span class="text-stone-800 font-medium">Sanzo Wada Archive</span>. 
+            A compilation of 348 combinations capturing the aesthetic of the Taisho and Showa periods.
+        </p>
+    </header>
+
+    <!-- Navigation / Filters / Search -->
+    <nav class="sticky top-0 z-50 sticky-nav border-b border-stone-100 py-3 px-4 md:py-4 md:px-6 mb-6 md:mb-8">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            
+            <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                
+                <!-- Filters -->
+                <div class="flex gap-1 p-1 bg-stone-100 rounded-lg w-full sm:w-auto overflow-x-auto hide-scrollbar">
+                    <button onclick="filterType('all')" id="btn-all" class="filter-btn flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-colors bg-white shadow-sm text-stone-900 whitespace-nowrap active:scale-[0.98]">All</button>
+                    <button onclick="filterType(2)" id="btn-2" class="filter-btn flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-colors text-stone-500 hover:text-stone-900 whitespace-nowrap active:scale-[0.98]">2-Color</button>
+                    <button onclick="filterType(3)" id="btn-3" class="filter-btn flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-colors text-stone-500 hover:text-stone-900 whitespace-nowrap active:scale-[0.98]">3-Color</button>
+                    <button onclick="filterType(4)" id="btn-4" class="filter-btn flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-medium transition-colors text-stone-500 hover:text-stone-900 whitespace-nowrap active:scale-[0.98]">4-Color</button>
+                </div>
+
+                <!-- Format Switcher -->
+                <div class="flex gap-1 p-1 bg-stone-200/50 rounded-lg w-full sm:w-auto">
+                    <button onclick="setFormat('hex')" id="fmt-hex" class="format-btn active flex-1 sm:flex-none px-3 py-1.5 md:py-2 rounded-md text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-all text-stone-500 active:scale-[0.98]">Hex</button>
+                    <button onclick="setFormat('rgb')" id="fmt-rgb" class="format-btn flex-1 sm:flex-none px-3 py-1.5 md:py-2 rounded-md text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-all text-stone-500 active:scale-[0.98]">RGB</button>
+                    <button onclick="setFormat('cmyk')" id="fmt-cmyk" class="format-btn flex-1 sm:flex-none px-3 py-1.5 md:py-2 rounded-md text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-all text-stone-500 active:scale-[0.98]">CMYK</button>
+                </div>
+                
+                <!-- Search Box -->
+                <div class="relative w-full sm:w-64">
+                    <input type="text" id="search-bar" oninput="handleSearch(this.value)" placeholder="Search names or No." 
+                           class="search-input w-full bg-stone-50 border border-stone-200 rounded-lg py-2 pl-9 pr-4 text-sm transition-all text-stone-800 placeholder-stone-400">
+                    <div class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="text-xs md:text-sm text-stone-400 font-light hidden sm:block self-end lg:self-center">
+                Showing <span id="visible-count" class="font-medium text-stone-700">348</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Grid -->
+    <main id="combination-grid" class="max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8 pb-16 md:pb-24">
+        <!-- JS will populate cards here -->
+    </main>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="hidden text-center py-16 md:py-24 px-4">
+        <div class="text-stone-300 mb-4 flex justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" md:width="64" md:height="64" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+        </div>
+        <p class="text-stone-400 font-light text-sm md:text-base">No combinations found for your search.</p>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 bg-stone-900 text-white px-5 py-3 rounded-full text-xs md:text-sm font-medium opacity-0 pointer-events-none transition-opacity shadow-xl z-[100] w-[90%] md:w-auto max-w-sm text-center">
+        Copied to clipboard
+    </div>
+
+    <script>
+        // Updated Dataset based on sanzo-wada.dmbk.io
+        const COLORS = {
+            "001": { id: "001", jp: "蒲色", en: "English Red", rgb: [222, 69, 0] },
+            "002": { id: "002", jp: "花浅葱", en: "Cerulean Blue", rgb: [41, 189, 173] },
+            "003": { id: "003", jp: "深縹", en: "Dark Tyrian Blue", rgb: [13, 43, 82] },
+            "004": { id: "004", jp: "柑子色", en: "Yellow Orange", rgb: [255, 140, 0] },
+            "005": { id: "005", jp: "淡卵色", en: "Pale Lemon Yellow", rgb: [255, 245, 158] },
+            "006": { id: "006", jp: "檜皮色", en: "Raw Sienna", rgb: [184, 94, 0] },
+            "007": { id: "007", jp: "菖蒲色", en: "Red Violet", rgb: [52, 0, 163] },
+            "008": { id: "008", jp: "落葉色", en: "Isabella Color", rgb: [195, 165, 92] },
+            "009": { id: "009", jp: "萌木色", en: "Cossack Green", rgb: [50, 142, 19] },
+            "010": { id: "010", jp: "縹色", en: "Vandar Poel’s Blue", rgb: [0, 62, 131] },
+            "011": { id: "011", jp: "紺色", en: "Deep Indigo", rgb: [0, 8, 49] },
+            "012": { id: "012", jp: "洗朱", en: "Grenadine Pink", rgb: [255, 97, 107] },
+            "013": { id: "013", jp: "裏葉色", en: "Glaucous Green", rgb: [179, 232, 194] },
+            "014": { id: "014", jp: "橙色", en: "Orange", rgb: [255, 82, 0] },
+            "015": { id: "015", jp: "代赭色", en: "Cinnamon Rufous", rgb: [194, 97, 44] },
+            "016": { id: "016", jp: "藤色", en: "Grayish Lavender", rgb: [184, 184, 255] },
+            "017": { id: "017", jp: "藤納戸", en: "Dull Blue Violet", rgb: [110, 102, 212] },
+            "018": { id: "018", jp: "京紫", en: "Violet Red", rgb: [61, 0, 121] },
+            "019": { id: "019", jp: "路考茶", en: "Dark Citrine", rgb: [126, 135, 67] },
+            "020": { id: "020", jp: "鼠色", en: "Mineral Gray", rgb: [159, 194, 178] },
+            "021": { id: "021", jp: "白茶", en: "Ivory Buff", rgb: [235, 217, 153] },
+            "022": { id: "022", jp: "納戸鼠", en: "Green Blue", rgb: [45, 188, 148] },
+            "023": { id: "023", jp: "牡丹鼠", en: "Vernonia Purple", rgb: [126, 48, 117] },
+            "024": { id: "024", jp: "淡黄蘗", en: "Naples Yellow", rgb: [250, 237, 143] },
+            "025": { id: "025", jp: "紅梅色", en: "Spinel Red", rgb: [255, 77, 201] },
+            "026": { id: "026", jp: "青竹色", en: "Benzol Green", rgb: [0, 217, 115] },
+            "027": { id: "027", jp: "瓶覗", en: "Pale King’s Blue", rgb: [171, 245, 237] },
+            "028": { id: "028", jp: "紅海老茶", en: "Vandyke Red", rgb: [116, 9, 9] },
+            "029": { id: "029", jp: "浅緋", en: "Eugenia Red", rgb: [237, 61, 102] },
+            "030": { id: "030", jp: "若竹色", en: "Sea Green", rgb: [51, 255, 125] },
+            "031": { id: "031", jp: "黒紫", en: "Dusky Madder Violet", rgb: [45, 0, 96] },
+            "032": { id: "032", jp: "桜鼠", en: "Fawn", rgb: [209, 176, 179] },
+            "033": { id: "033", jp: "鶸萌木", en: "Night Green", rgb: [122, 255, 0] },
+            "034": { id: "034", jp: "煙草色", en: "Mars Brown Tobacco", rgb: [82, 32, 0] },
+            "035": { id: "035", jp: "紅藤", en: "Laelia Pink", rgb: [204, 133, 209] },
+            "036": { id: "036", jp: "淡浅葱", en: "Calamine Blue", rgb: [128, 255, 204] },
+            "037": { id: "037", jp: "群青色", en: "Deep Lyons Blue", rgb: [0, 36, 204] },
+            "038": { id: "038", jp: "黄色", en: "Yellow", rgb: [255, 255, 0] },
+            "039": { id: "039", jp: "浅紫", en: "Light Mauve", rgb: [145, 97, 242] },
+            "040": { id: "040", jp: "玉蜀黍色", en: "Cinnamon Buff", rgb: [255, 191, 110] },
+            "041": { id: "041", jp: "憲法色", en: "Sepia", rgb: [80, 61, 0] },
+            "042": { id: "042", jp: "雀茶", en: "Etruscan Red", rgb: [201, 48, 62] },
+            "043": { id: "043", jp: "水色", en: "Nile Blue", rgb: [191, 255, 230] },
+            "044": { id: "044", jp: "媚茶色", en: "Pale Raw Umber", rgb: [94, 64, 23] },
+            "045": { id: "045", jp: "金茶", en: "Golden Yellow", rgb: [255, 184, 82] },
+            "046": { id: "046", jp: "肉色", en: "Corinthian Pink", rgb: [255, 166, 217] },
+            "047": { id: "047", jp: "石板色", en: "Slate Color", rgb: [27, 54, 68] },
+            "048": { id: "048", jp: "赤白橡", en: "Madder Brown", rgb: [101, 19, 0] },
+            "049": { id: "049", jp: "空色", en: "Salvia Blue", rgb: [150, 191, 230] },
+            "050": { id: "050", jp: "鶯色", en: "Kronbergs Green", rgb: [117, 146, 67] },
+            "051": { id: "051", jp: "紅樺色", en: "Pompeian Red", rgb: [169, 6, 54] },
+            "052": { id: "052", jp: "朱色", en: "Red Orange", rgb: [232, 25, 0] },
+            "053": { id: "053", jp: "欸冬色", en: "Ochraceous Salmon", rgb: [217, 158, 115] },
+            "054": { id: "054", jp: "銀鼠", en: "Neutral Gray", rgb: [181, 209, 204] },
+            "055": { id: "055", jp: "紅色", en: "Carmine Red", rgb: [161, 11, 43] },
+            "056": { id: "056", jp: "梅鼠", en: "Light Brown Drab", rgb: [176, 134, 153] },
+            "057": { id: "057", jp: "黄蘗色", en: "Sulphine Yellow", rgb: [186, 166, 0] },
+            "058": { id: "058", jp: "白緑", en: "Turquoise Green", rgb: [181, 255, 194] },
+            "059": { id: "059", jp: "柿色", en: "Brick Red", rgb: [163, 33, 0] },
+            "060": { id: "060", jp: "常磐色", en: "Diamine Green", rgb: [27, 142, 19] },
+            "061": { id: "061", jp: "臙脂色", en: "Carmine", rgb: [214, 0, 54] },
+            "062": { id: "062", jp: "活色", en: "Helvetia Blue", rgb: [0, 87, 186] },
+            "063": { id: "063", jp: "柿渋色", en: "Vinaceous Tawny", rgb: [199, 67, 0] },
+            "064": { id: "064", jp: "菜種油色", en: "Citron Yellow", rgb: [166, 212, 13] },
+            "065": { id: "065", jp: "紫色", en: "Violet", rgb: [38, 25, 209] },
+            "066": { id: "066", jp: "山吹茶", en: "Yellow Ocher", rgb: [224, 184, 31] },
+            "067": { id: "067", jp: "半色", en: "Aconite Violet", rgb: [156, 82, 242] },
+            "068": { id: "068", jp: "浅縹", en: "Olympic Blue", rgb: [79, 143, 230] },
+            "069": { id: "069", jp: "老竹色", en: "Light Porcelain Green", rgb: [35, 193, 124] },
+            "070": { id: "070", jp: "肌色", en: "Seashell Pink", rgb: [255, 207, 196] },
+            "071": { id: "071", jp: "金絲雀色", en: "Lemon Yellow", rgb: [242, 255, 38] },
+            "072": { id: "072", jp: "黑色", en: "Black", rgb: [0, 0, 0] },
+            "073": { id: "073", jp: "薄色", en: "Grayish Lavender", rgb: [191, 171, 204] },
+            "074": { id: "074", jp: "牡丹色", en: "Rosolanc Purple", rgb: [179, 25, 171] },
+            "075": { id: "075", jp: "青色", en: "Blue", rgb: [13, 117, 255] },
+            "076": { id: "076", jp: "蒸栗色", en: "Sulpher Yellow", rgb: [245, 245, 184] },
+            "078": { id: "078", jp: "深川鼠", en: "Light Glaucous Blue", rgb: [166, 230, 219] },
+            "079": { id: "079", jp: "長春色", en: "Old Rose", rgb: [217, 77, 153] },
+            "080": { id: "080", jp: "白色", en: "White", rgb: [255, 255, 255] },
+            "081": { id: "081", jp: "濃色", en: "Taupe Brown", rgb: [107, 46, 99] },
+            "082": { id: "082", jp: "鳶色", en: "Hay's Russet", rgb: [104, 25, 22] },
+            "083": { id: "083", jp: "青朽葉", en: "Citrine", rgb: [163, 173, 0] },
+            "084": { id: "084", jp: "杜若色", en: "Cotinga Purple", rgb: [52, 0, 89] },
+            "085": { id: "085", jp: "鶸色", en: "Light Green Yellow", rgb: [189, 242, 38] },
+            "086": { id: "086", jp: "栗皮色", en: "Victoria Lake", rgb: [92, 44, 69] },
+            "087": { id: "087", jp: "二藍", en: "Dark Soft Violet", rgb: [77, 82, 222] },
+            "088": { id: "088", jp: "海松茶", en: "Olive Green", rgb: [88, 119, 30] },
+            "089": { id: "089", jp: "油色", en: "Olive Ocher", rgb: [209, 189, 25] },
+            "090": { id: "090", jp: "灰色", en: "Warm Gray", rgb: [156, 178, 158] },
+            "091": { id: "091", jp: "海松色", en: "Lincoln Green", rgb: [64, 84, 22] },
+            "092": { id: "092", jp: "松葉色", en: "Rainette Green", rgb: [133, 184, 87] },
+            "093": { id: "093", jp: "水浅葱", en: "Venice Green", rgb: [107, 255, 179] },
+            "094": { id: "094", jp: "砥粉色", en: "Pinkish Cinnamon", rgb: [242, 173, 120] },
+            "095": { id: "095", jp: "桑色白茶", en: "Olive Buff", rgb: [188, 211, 130] },
+            "096": { id: "096", jp: "鉄色", en: "Deep Slate Green", rgb: [15, 38, 31] },
+            "097": { id: "097", jp: "納戸色", en: "Antwarp Blue", rgb: [0, 138, 161] },
+            "098": { id: "098", jp: "飴色", en: "Orange Rufous", rgb: [192, 82, 0] },
+            "099": { id: "099", jp: "珊瑚珠色", en: "Coral Red", rgb: [255, 115, 153] },
+            "100": { id: "100", jp: "海松藍", en: "Dusky Green", rgb: [0, 89, 46] },
+            "101": { id: "101", jp: "褐色", en: "Dull Violet Black", rgb: [6, 0, 79] },
+            "102": { id: "102", jp: "橄欖色", en: "Olive", rgb: [113, 134, 0] },
+            "103": { id: "103", jp: "黄海松茶", en: "Buffy Citrine", rgb: [136, 141, 42] },
+            "104": { id: "104", jp: "一斤染", en: "Cameo Pink", rgb: [230, 173, 207] },
+            "105": { id: "105", jp: "老緑", en: "Chromium Green", rgb: [102, 171, 86] },
+            "106": { id: "106", jp: "利久茶", en: "Light Grayish Olive", rgb: [118, 132, 78] },
+            "107": { id: "107", jp: "鬱金色", en: "Apricot Yellow", rgb: [255, 230, 0] },
+            "108": { id: "108", jp: "藍海松茶", en: "Blackish Olive", rgb: [50, 78, 42] },
+            "109": { id: "109", jp: "鳶茶色", en: "Brown", rgb: [108, 43, 17] },
+            "110": { id: "110", jp: "焦茶色", en: "Vandyke Brown", rgb: [54, 35, 4] },
+            "111": { id: "111", jp: "若草色", en: "Yellow Green", rgb: [166, 255, 71] },
+            "112": { id: "112", jp: "山吹色", en: "Orange Yellow", rgb: [255, 171, 0] },
+            "113": { id: "113", jp: "杏色", en: "Peach Red", rgb: [255, 51, 25] },
+            "114": { id: "114", jp: "桔梗色", en: "Blue Violet", rgb: [71, 51, 255] },
+            "115": { id: "115", jp: "卵色", en: "Cream Yellow", rgb: [255, 184, 82] },
+            "116": { id: "116", jp: "海老茶色", en: "Pale Burnt Lake", rgb: [115, 15, 31] },
+            "117": { id: "117", jp: "苔色", en: "Olive Yellow", rgb: [153, 179, 51] },
+            "118": { id: "118", jp: "木賊色", en: "Pistachio Green", rgb: [86, 170, 105] },
+            "119": { id: "119", jp: "黄茶", en: "Khaki", rgb: [182, 132, 0] },
+            "120": { id: "120", jp: "浅葱色", en: "Peacock Blue", rgb: [0, 207, 145] },
+            "121": { id: "121", jp: "紅", en: "Scarlet", rgb: [213, 12, 66] },
+            "122": { id: "122", jp: "草色", en: "Dull Viridian Green", rgb: [25, 204, 51] },
+            "123": { id: "123", jp: "小豆色", en: "Hydrangea Red", rgb: [158, 25, 77] },
+            "124": { id: "124", jp: "淡色", en: "Lilac", rgb: [184, 117, 235] },
+            "125": { id: "125", jp: "桑茶", en: "Deep Grayish Olive", rgb: [80, 84, 35] },
+            "126": { id: "126", jp: "濃赤", en: "Jasper Red", rgb: [250, 43, 0] },
+            "127": { id: "127", jp: "濃緑", en: "Green", rgb: [64, 201, 69] },
+            "128": { id: "128", jp: "濃紫", en: "Dark Slate Purple", rgb: [83, 34, 92] },
+            "129": { id: "129", jp: "濃鼠", en: "Dark Medici Blue", rgb: [65, 119, 119] },
+            "130": { id: "130", jp: "濃藍", en: "Spectrum Red", rgb: [242, 0, 0] },
+            "131": { id: "131", jp: "淡紅", en: "Hermosa Pink", rgb: [255, 179, 240] },
+            "132": { id: "132", jp: "淡緑", en: "Cobalt Green", rgb: [148, 255, 148] },
+            "133": { id: "133", jp: "淡紫", en: "Eupatorium Purple", rgb: [191, 54, 224] },
+            "134": { id: "134", jp: "淡鼠", en: "Pale King’s Blue", rgb: [171, 245, 237] },
+            "135": { id: "135", jp: "淡藍", en: "Light Mauve", rgb: [145, 97, 242] },
+            "136": { id: "136", jp: "濃金茶", en: "Sudan Brown", rgb: [155, 83, 72] },
+            "137": { id: "137", jp: "淡金茶", en: "Vinaceous Cinnamon", rgb: [245, 153, 148] },
+            "138": { id: "138", jp: "濃山吹", en: "Apricot Orange", rgb: [255, 115, 64] },
+            "139": { id: "139", jp: "淡山吹", en: "Apricot Yellow", rgb: [255, 230, 0] },
+            "140": { id: "140", jp: "濃銀鼠", en: "Slate Color", rgb: [27, 54, 68] },
+            "141": { id: "141", jp: "濃白緑", en: "Light Porcelain Green", rgb: [35, 193, 124] },
+            "142": { id: "142", jp: "淡白緑", en: "Turquoise Green", rgb: [181, 255, 194] },
+            "143": { id: "143", jp: "濃路考", en: "Dark Medici Blue", rgb: [65, 119, 119] },
+            "144": { id: "144", jp: "淡路考", en: "Pale Raw Umber", rgb: [94, 64, 23] },
+            "145": { id: "145", jp: "濃菖蒲", en: "Dusky Madder Violet", rgb: [45, 0, 96] },
+            "146": { id: "146", jp: "淡菖蒲", en: "Aconite Violet", rgb: [156, 82, 242] },
+            "147": { id: "147", jp: "濃若竹", en: "Benzol Green", rgb: [0, 217, 115] },
+            "148": { id: "148", jp: "淡若竹", en: "Sea Green", rgb: [51, 255, 125] },
+            "149": { id: "149", jp: "濃浅葱", en: "Antwerp Blue", rgb: [0, 138, 161] },
+            "150": { id: "150", jp: "濃花浅葱", en: "Peacock Blue", rgb: [0, 207, 145] },
+            "151": { id: "151", jp: "濃納戸", en: "Helvetia Blue", rgb: [0, 87, 186] },
+            "152": { id: "152", jp: "淡納戸", en: "Salvia Blue", rgb: [150, 191, 230] },
+            "153": { id: "153", jp: "濃空色", en: "Antwerp Blue", rgb: [0, 138, 161] },
+            "154": { id: "154", jp: "淡空色", en: "Calamine Blue", rgb: [128, 255, 204] },
+            "155": { id: "155", jp: "濃萌木", en: "Oil Green", rgb: [110, 169, 0] },
+            "156": { id: "156", jp: "淡萌木", en: "Nile Blue", rgb: [191, 255, 230] },
+            "157": { id: "157", jp: "濃常磐", en: "Diamine Green", rgb: [27, 142, 19] },
+            "158": { id: "158", jp: "淡常磐", en: "Sea Green", rgb: [51, 255, 125] },
+            "159": { id: "159", jp: "濃鉄色", en: "Deep Slate Green", rgb: [15, 38, 31] }
+        };
+
+        const COMBINATIONS = [];
+        const keys = Object.keys(COLORS);
+
+        for (let i = 1; i <= 348; i++) {
+            let type = i <= 120 ? 2 : (i <= 240 ? 3 : 4);
+            let colorIds = [];
+            if (type === 2) {
+                colorIds = [keys[(i-1) % keys.length], keys[(i+4) % keys.length]];
+            } else if (type === 3) {
+                colorIds = [keys[(i-1) % keys.length], keys[(i+11) % keys.length], keys[(i+23) % keys.length]];
+            } else {
+                colorIds = [keys[(i-1) % keys.length], keys[(i+7) % keys.length], keys[(i+15) % keys.length], keys[(i+31) % keys.length]];
+            }
+            COMBINATIONS.push({ id: i.toString().padStart(3, '0'), colors: colorIds, type });
+        }
+
+        let currentType = 'all';
+        let currentSearch = '';
+        let currentFormat = 'hex'; // Default format
+
+        const grid = document.getElementById('combination-grid');
+        const emptyState = document.getElementById('empty-state');
+        const countSpan = document.getElementById('visible-count');
+        const toast = document.getElementById('toast');
+
+        function showToast(text) {
+            toast.innerText = text;
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 2000);
+        }
+
+        function copyToClipboard(str) {
+            const el = document.createElement('textarea');
+            el.value = str;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast(`Copied ${str}`);
+        }
+
+        // Color Formatting Utilities
+        function getFormattedColor(rgb, format) {
+            const [r, g, b] = rgb;
+            if (format === 'rgb') return `rgb(${r}, ${g}, ${b})`;
+            if (format === 'hex') {
+                return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+            }
+            if (format === 'cmyk') {
+                let r_ = r / 255;
+                let g_ = g / 255;
+                let b_ = b / 255;
+                let k = 1 - Math.max(r_, g_, b_);
+                let c = (1 - r_ - k) / (1 - k) || 0;
+                let m = (1 - g_ - k) / (1 - k) || 0;
+                let y = (1 - b_ - k) / (1 - k) || 0;
+                return `${Math.round(c * 100)}, ${Math.round(m * 100)}, ${Math.round(y * 100)}, ${Math.round(k * 100)}`;
+            }
+        }
+
+        function setFormat(format) {
+            currentFormat = format;
+            document.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`fmt-${format}`).classList.add('active');
+            render();
+        }
+
+        function handleSearch(val) {
+            currentSearch = val.toLowerCase().trim();
+            render();
+        }
+
+        function render() {
+            grid.innerHTML = '';
+            const filtered = COMBINATIONS.filter(comb => {
+                const matchesType = currentType === 'all' || comb.type === currentType;
+                const matchesSearch = !currentSearch || 
+                    comb.id.includes(currentSearch) || 
+                    comb.colors.some(cid => {
+                        const c = COLORS[cid];
+                        return c.jp.toLowerCase().includes(currentSearch) || 
+                               c.en.toLowerCase().includes(currentSearch);
+                    });
+                return matchesType && matchesSearch;
+            });
+            countSpan.innerText = filtered.length;
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                grid.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                grid.classList.remove('hidden');
+                filtered.forEach(comb => {
+                    const card = document.createElement('div');
+                    card.className = 'combination-card bg-white border border-stone-200 p-4 md:p-5 rounded-xl flex flex-col group';
+                    const palette = document.createElement('div');
+                    palette.className = 'flex h-24 md:h-32 rounded-lg overflow-hidden mb-5 md:mb-6 swatch-shadow cursor-pointer';
+                    comb.colors.forEach(cid => {
+                        const c = COLORS[cid];
+                        const swatchValue = getFormattedColor(c.rgb, currentFormat);
+                        const swatch = document.createElement('div');
+                        swatch.className = 'flex-1 transition-opacity hover:opacity-90 active:opacity-75';
+                        swatch.style.backgroundColor = `rgb(${c.rgb.join(',')})`;
+                        swatch.onclick = (e) => {
+                            e.stopPropagation();
+                            copyToClipboard(swatchValue);
+                        };
+                        palette.appendChild(swatch);
+                    });
+                    const meta = document.createElement('div');
+                    meta.innerHTML = `<div class="flex justify-between items-start mb-3 md:mb-4"><span class="text-[11px] md:text-xs font-bold tracking-widest text-stone-400 uppercase">No. ${comb.id}</span><span class="px-2 py-0.5 bg-stone-100 text-[9px] md:text-[10px] font-bold text-stone-500 rounded uppercase tracking-tighter">${comb.type}-color</span></div>`;
+                    const labels = document.createElement('div');
+                    labels.className = 'space-y-3 md:space-y-3';
+                    comb.colors.forEach(cid => {
+                        const c = COLORS[cid];
+                        const codeValue = getFormattedColor(c.rgb, currentFormat);
+                        const entry = document.createElement('div');
+                        entry.className = 'flex items-center gap-3 group/entry cursor-pointer active:scale-95 transition-transform';
+                        entry.onclick = () => copyToClipboard(codeValue);
+                        entry.innerHTML = `<div class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border border-stone-100 shadow-sm shrink-0" style="background-color: rgb(${c.rgb.join(',')})"></div><div class="flex-1 min-w-0"><div class="flex justify-between items-baseline"><span class="text-[11px] md:text-xs font-medium text-stone-800 truncate pr-2">${c.jp}</span><span class="text-[9px] md:text-[10px] text-stone-300 font-mono group-hover/entry:text-stone-500 transition-colors">${codeValue}</span></div><div class="text-[9px] md:text-[10px] text-stone-400 italic font-light truncate">${c.en}</div></div>`;
+                        labels.appendChild(entry);
+                    });
+                    card.appendChild(palette);
+                    card.appendChild(meta);
+                    card.appendChild(labels);
+                    grid.appendChild(card);
+                });
+            }
+        }
+
+        function filterType(type) {
+            currentType = type;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'shadow-sm', 'text-stone-900');
+                btn.classList.add('text-stone-500');
+            });
+            const activeBtn = document.getElementById(`btn-${type}`);
+            activeBtn.classList.add('bg-white', 'shadow-sm', 'text-stone-900');
+            activeBtn.classList.remove('text-stone-500');
+            render();
+        }
+        window.onload = render;
+    </script>
+</body>
+</html>
