@@ -13,6 +13,22 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* Splash Screen Animation */
+        #splash-screen {
+            transition: opacity 0.8s ease-in-out;
+        }
+        .splash-content {
+            animation: splashFadeInUp 1.2s ease-out forwards;
+        }
+        @keyframes splashFadeInUp {
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .red-sun {
+            background-color: #bc002d; /* Traditional Japanese Red */
+        }
+
+        /* Main UI Styles */
         .combination-card {
             border: 1px solid #e5e5e5;
             background-color: #ffffff;
@@ -107,19 +123,18 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
-        /* Forced White Overlays for crisp legibility against ANY background */
-        .text-overlay {
-            color: #ffffff !important;
-            text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.4);
-        }
-        .svg-overlay {
-            color: #ffffff !important;
-            filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.4));
-        }
     </style>
 </head>
-<body class="antialiased flex flex-col min-h-screen">
+<body class="antialiased flex flex-col min-h-screen overflow-hidden"> <!-- Hidden until splash completes -->
+
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="fixed inset-0 z-[9999] bg-[#fafafa] flex flex-col items-center justify-center">
+        <div class="splash-content flex flex-col items-center">
+            <div class="w-16 h-16 md:w-20 md:h-20 rounded-full red-sun mb-10 shadow-sm"></div>
+            <h1 class="text-4xl md:text-5xl font-medium tracking-[0.2em] text-[#111111] mb-6">配色事典</h1>
+            <p class="text-zinc-400 text-[10px] md:text-xs uppercase tracking-[0.3em] font-medium">A Dictionary of Color Combinations</p>
+        </div>
+    </div>
 
     <!-- Header -->
     <header class="pt-12 pb-10 px-4 md:pt-16 md:pb-12 md:px-8 w-full border-b border-zinc-200 bg-white">
@@ -218,6 +233,20 @@
     </div>
 
     <script>
+        // Splash Screen Logic
+        window.addEventListener('load', () => {
+            const splash = document.getElementById('splash-screen');
+            if(splash) {
+                setTimeout(() => {
+                    splash.style.opacity = '0';
+                    document.body.classList.remove('overflow-hidden');
+                    setTimeout(() => splash.remove(), 800);
+                }, 1600); 
+            } else {
+                document.body.classList.remove('overflow-hidden');
+            }
+        });
+
         // Dataset based on sanzo-wada.dmbk.io
         const COLORS = {
             "001": { id: "001", jp: "蒲色", en: "English Red", rgb: [222, 69, 0] },
@@ -454,6 +483,12 @@
             }
         }
 
+        function getContrastYIQ(rgb) {
+            const [r, g, b] = rgb;
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return (yiq >= 128) ? '#111111' : '#ffffff'; 
+        }
+
         function toggleFavorite(type, id, event) {
             if(event) event.stopPropagation();
             const favKey = type + '-' + id;
@@ -520,15 +555,17 @@
         function createColorCard(c) {
             const isFav = favorites.includes('color-' + c.id);
             const codeValue = getFormattedColor(c.rgb, currentFormat);
+            const textColor = getContrastYIQ(c.rgb);
             
             const card = document.createElement('div');
             card.className = 'combination-card flex flex-col h-48 md:h-56 cursor-pointer group/card relative';
             
             const favBtn = document.createElement('button');
             favBtn.className = `absolute top-3 left-3 z-10 p-1.5 transition-opacity ${isFav ? 'opacity-100' : 'opacity-0 group-hover/card:opacity-100'}`;
+            favBtn.style.color = textColor;
             favBtn.onclick = (e) => toggleFavorite('color', c.id, e);
             favBtn.innerHTML = `
-                <svg class="w-3.5 h-3.5 svg-overlay ${isFav ? 'fill-current' : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="${isFav ? 'currentColor' : 'none'}">
+                <svg class="w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="${isFav ? 'currentColor' : 'none'}">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
             `;
@@ -537,10 +574,11 @@
             const cardWrapper = document.createElement('div');
             cardWrapper.className = 'flex-1 p-4 flex flex-col justify-end relative transition-colors';
             cardWrapper.style.backgroundColor = `rgb(${c.rgb.join(',')})`;
+            cardWrapper.style.color = textColor;
             cardWrapper.onclick = () => openColorOverlay(c.id);
             
             cardWrapper.innerHTML = `
-                <div class="flex justify-between items-end w-full leading-none text-overlay">
+                <div class="flex justify-between items-end w-full leading-none">
                     <div class="flex flex-col gap-1.5">
                         <span class="text-lg md:text-xl font-medium tracking-tight">${c.jp}</span>
                         <span class="text-[10px] uppercase font-medium tracking-widest">${c.en}</span>
@@ -559,9 +597,10 @@
             
             const favBtn = document.createElement('button');
             favBtn.className = `absolute top-3 left-3 z-10 p-1.5 transition-opacity ${isFav ? 'opacity-100' : 'opacity-0 group-hover/card:opacity-100'}`;
+            favBtn.style.color = getContrastYIQ(COLORS[comb.colors[0]].rgb);
             favBtn.onclick = (e) => toggleFavorite('comb', comb.id, e);
             favBtn.innerHTML = `
-                <svg class="w-3.5 h-3.5 svg-overlay ${isFav ? 'fill-current' : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="${isFav ? 'currentColor' : 'none'}">
+                <svg class="w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="${isFav ? 'currentColor' : 'none'}">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
             `;
@@ -574,10 +613,12 @@
             comb.colors.forEach((cid, index) => {
                 const c = COLORS[cid];
                 const codeValue = getFormattedColor(c.rgb, currentFormat);
+                const textColor = getContrastYIQ(c.rgb);
                 
                 const swatch = document.createElement('div');
-                swatch.className = `flex-1 p-3 flex flex-col justify-end relative cursor-pointer hover:flex-[1.1] transition-all duration-300 text-overlay`;
+                swatch.className = `flex-1 p-3 flex flex-col justify-end relative cursor-pointer hover:flex-[1.1] transition-all duration-300`;
                 swatch.style.backgroundColor = `rgb(${c.rgb.join(',')})`;
+                swatch.style.color = textColor;
                 
                 swatch.onclick = (e) => {
                     e.stopPropagation();
@@ -591,7 +632,7 @@
                             <span class="text-[9px] uppercase font-medium tracking-widest">${c.en}</span>
                         </div>
                         <div class="flex flex-col items-end pointer-events-none gap-1">
-                            ${index === 0 ? `<span class="absolute top-3 right-3 text-[9px] font-medium tracking-widest text-overlay">NO. ${comb.id}</span>` : ''}
+                            ${index === 0 ? `<span class="absolute top-3 right-3 text-[9px] font-medium tracking-widest">NO. ${comb.id}</span>` : ''}
                             <span class="text-[9px] font-mono tracking-widest uppercase mt-auto">${codeValue}</span>
                         </div>
                     </div>
@@ -702,14 +743,15 @@
             if (current.type === 'color') {
                 const c = COLORS[current.id];
                 const bg = `rgb(${c.rgb.join(',')})`;
+                const textColor = getContrastYIQ(c.rgb);
                 const isFav = favorites.includes('color-' + current.id);
                 const relatedCombs = COMBINATIONS.filter(comb => comb.colors.includes(current.id));
                 const codeValue = getFormattedColor(c.rgb, currentFormat);
 
                 let combsHtml = relatedCombs.map(comb => `
-                    <button onclick="openCombinationOverlay('${comb.id}')" class="flex flex-col h-28 border border-white/20 transition-colors hover:border-white/50 text-left group bg-transparent w-full">
+                    <button onclick="openCombinationOverlay('${comb.id}')" class="flex flex-col h-28 border transition-colors text-left group bg-transparent w-full" style="border-color: ${textColor}30;">
                         <div class="w-full flex justify-between p-2 shrink-0">
-                            <span class="text-[9px] uppercase tracking-widest text-overlay" style="opacity: 0.8;">NO. ${comb.id}</span>
+                            <span class="text-[9px] uppercase tracking-widest" style="color: ${textColor}; opacity: 0.8;">NO. ${comb.id}</span>
                         </div>
                         <div class="flex flex-1 w-full pb-2 px-2 gap-0.5">
                             ${comb.colors.map(colorId => `<div class="flex-1 h-full" style="background-color: rgb(${COLORS[colorId].rgb.join(',')});"></div>`).join('')}
@@ -718,38 +760,38 @@
                 `).join('');
 
                 overlay.innerHTML = `
-                    <div class="absolute inset-0 overflow-y-auto" style="background-color: ${bg};">
+                    <div class="absolute inset-0 overflow-y-auto" style="background-color: ${bg}; color: ${textColor};">
                         <!-- Top Navigation Actions -->
-                        <div class="fixed top-0 left-0 right-0 z-50 p-6 md:px-8 flex gap-4 pointer-events-none text-overlay">
-                            <button onclick="overlayBack()" class="pointer-events-auto flex items-center gap-2 py-2 text-[10px] tracking-widest uppercase hover:opacity-75 transition-opacity">
-                                <svg class="w-3.5 h-3.5 svg-overlay" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg> Back
+                        <div class="fixed top-0 left-0 right-0 z-50 p-6 md:px-8 flex gap-4 pointer-events-none">
+                            <button onclick="overlayBack()" class="pointer-events-auto flex items-center gap-2 py-2 text-[10px] tracking-widest uppercase hover:opacity-75 transition-opacity" style="color: ${textColor}">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg> Back
                             </button>
                             
-                            <button onclick="toggleFavorite('color', '${current.id}', event)" class="pointer-events-auto ml-auto p-2 hover:opacity-75 transition-opacity">
-                                <svg class="w-4 h-4 svg-overlay ${isFav ? 'fill-current' : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="${isFav ? 'currentColor' : 'none'}">
+                            <button onclick="toggleFavorite('color', '${current.id}', event)" class="pointer-events-auto ml-auto p-2 hover:opacity-75 transition-opacity" style="color: ${textColor}">
+                                <svg class="w-4 h-4 ${isFav ? 'fill-current' : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="${isFav ? 'currentColor' : 'none'}">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                             </button>
 
-                            <button onclick="closeOverlay()" class="pointer-events-auto flex items-center gap-2 py-2 text-[10px] tracking-widest uppercase hover:opacity-75 transition-opacity">
-                                <span class="hidden sm:block">Close</span> <svg class="w-3.5 h-3.5 svg-overlay" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            <button onclick="closeOverlay()" class="pointer-events-auto flex items-center gap-2 py-2 text-[10px] tracking-widest uppercase hover:opacity-75 transition-opacity" style="color: ${textColor}">
+                                <span class="hidden sm:block">Close</span> <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
                         
-                        <div class="min-h-full flex flex-col p-6 md:p-12 max-w-6xl mx-auto w-full pt-32 md:pt-48 pb-20 text-overlay">
+                        <div class="min-h-full flex flex-col p-6 md:p-12 max-w-6xl mx-auto w-full pt-32 md:pt-48 pb-20">
                             <!-- Header Data -->
                             <div class="mb-16 md:mb-24">
                                 <h2 class="text-5xl md:text-[6rem] lg:text-[8rem] font-medium tracking-tight mb-4 leading-none">${c.jp}</h2>
                                 <p class="text-lg md:text-3xl font-light mb-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 tracking-wide uppercase">
                                     <span>${c.en}</span> 
-                                    <span class="hidden sm:inline">&mdash;</span> 
+                                    <span class="hidden sm:inline opacity-30">&mdash;</span> 
                                     <span class="font-mono cursor-pointer transition-opacity hover:opacity-80" onclick="copyToClipboard('${codeValue}')">${codeValue}</span>
                                 </p>
                             </div>
                             
                             <!-- Hyperlinks / Related Combinations -->
                             <div class="w-full mt-auto">
-                                <h3 class="text-[10px] md:text-xs font-medium mb-6 tracking-widest border-b border-white/30 pb-3 flex items-center gap-3 uppercase">
+                                <h3 class="text-[10px] md:text-xs font-medium mb-6 tracking-widest border-b pb-3 flex items-center gap-3 uppercase" style="border-color: ${textColor}40;">
                                     Appears in ${relatedCombs.length} Combinations
                                 </h3>
                                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
@@ -763,42 +805,66 @@
                 const comb = COMBINATIONS.find(c => c.id === current.id);
                 const isFav = favorites.includes('comb-' + comb.id);
                 
+                // For responsive navigation text colors based on the top color bar
+                const firstColorId = comb.colors[0];
+                const lastColorId = comb.colors[comb.colors.length - 1];
+                const firstTextColor = getContrastYIQ(COLORS[firstColorId].rgb);
+                const lastTextColor = getContrastYIQ(COLORS[lastColorId].rgb);
+
                 let bgHtml = comb.colors.map((colorId, idx) => {
                     const c = COLORS[colorId];
+                    const textColor = getContrastYIQ(c.rgb);
                     return `
-                    <div class="flex-1 h-full flex flex-col justify-end p-6 md:p-12 cursor-pointer transition-all duration-500 hover:flex-[1.1] text-overlay" onclick="openColorOverlay('${c.id}')" style="background-color: rgb(${c.rgb.join(',')});">
+                    <div class="flex-1 h-full flex flex-col justify-end p-6 md:p-12 cursor-pointer transition-all duration-500 hover:flex-[1.1]" onclick="openColorOverlay('${c.id}')" style="background-color: rgb(${c.rgb.join(',')}); color: ${textColor};">
                         <div class="flex flex-col gap-1 transition-transform active:scale-95 leading-none">
                             <span class="text-3xl lg:text-5xl font-medium tracking-tight">${c.jp}</span>
-                            <span class="text-sm lg:text-base font-medium tracking-widest uppercase">${c.en}</span>
-                            <span class="text-[10px] lg:text-xs font-mono mt-3 tracking-widest uppercase">${getFormattedColor(c.rgb, currentFormat)}</span>
+                            <span class="text-sm lg:text-base font-medium tracking-widest uppercase opacity-80">${c.en}</span>
+                            <span class="text-[10px] lg:text-xs font-mono mt-3 tracking-widest uppercase opacity-80">${getFormattedColor(c.rgb, currentFormat)}</span>
                         </div>
                     </div>`;
                 }).join('');
                 
+                // Setup inline style to handle responsive contrast for the right nav buttons.
+                // On mobile (flex-col), right buttons sit on the first color. On desktop (flex-row), they sit on the last color.
+                const styleBlock = `
+                    <style>
+                        :root {
+                            --nav-right-color: ${firstTextColor};
+                        }
+                        @media (min-width: 768px) {
+                            :root {
+                                --nav-right-color: ${lastTextColor};
+                            }
+                        }
+                    </style>
+                `;
+
                 overlay.innerHTML = `
+                    ${styleBlock}
                     <div class="absolute inset-0 flex flex-col md:flex-row bg-white">
                         ${bgHtml}
-                        
-                        <!-- Overlay Title -->
-                        <div class="absolute inset-0 pointer-events-none flex flex-col justify-center items-center p-6 z-10 text-overlay">
-                            <h2 class="text-6xl md:text-[8rem] lg:text-[12rem] font-medium tracking-tighter leading-none">NO. ${comb.id}</h2>
-                        </div>
 
-                        <!-- Top Navigation Actions -->
-                        <div class="absolute top-0 left-0 right-0 z-50 p-6 md:px-8 flex gap-4 pointer-events-none text-overlay">
-                            <button onclick="overlayBack()" class="pointer-events-auto flex items-center gap-2 py-2 text-[10px] tracking-widest uppercase hover:opacity-75 transition-opacity">
-                                <svg class="w-3.5 h-3.5 svg-overlay" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg> Back
-                            </button>
+                        <!-- Top Navigation Actions (With 'NO. ID' at top left) -->
+                        <div class="absolute top-0 left-0 right-0 z-50 p-6 md:px-8 flex justify-between items-start pointer-events-none">
                             
-                            <button onclick="toggleFavorite('comb', '${comb.id}', event)" class="pointer-events-auto ml-auto p-2 hover:opacity-75 transition-opacity">
-                                <svg class="w-4 h-4 svg-overlay ${isFav ? 'fill-current' : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="${isFav ? 'currentColor' : 'none'}">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                </svg>
-                            </button>
+                            <div class="flex items-center gap-4">
+                                <button onclick="overlayBack()" class="pointer-events-auto flex items-center gap-2 py-2 text-[10px] tracking-widest uppercase hover:opacity-75 transition-opacity" style="color: ${firstTextColor};">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg> Back
+                                </button>
+                                <span class="text-[10px] md:text-xs font-bold tracking-widest uppercase mt-0.5" style="color: ${firstTextColor}; opacity: 0.8;">NO. ${comb.id}</span>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <button onclick="toggleFavorite('comb', '${comb.id}', event)" class="pointer-events-auto p-2 hover:opacity-75 transition-opacity" style="color: var(--nav-right-color);">
+                                    <svg class="w-4 h-4 ${isFav ? 'fill-current' : ''}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="${isFav ? 'currentColor' : 'none'}">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                </button>
 
-                            <button onclick="closeOverlay()" class="pointer-events-auto flex items-center gap-2 py-2 text-[10px] tracking-widest uppercase hover:opacity-75 transition-opacity">
-                                <span class="hidden sm:block">Close</span> <svg class="w-3.5 h-3.5 svg-overlay" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
+                                <button onclick="closeOverlay()" class="pointer-events-auto flex items-center gap-2 py-2 text-[10px] tracking-widest uppercase hover:opacity-75 transition-opacity" style="color: var(--nav-right-color);">
+                                    <span class="hidden sm:block">Close</span> <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
