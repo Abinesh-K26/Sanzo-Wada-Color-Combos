@@ -25,7 +25,7 @@
             100% { opacity: 1; transform: translateY(0); }
         }
         .red-sun {
-            background-color: #bc002d; /* Traditional Japanese Red */
+            background-color: #bc002d; 
         }
 
         /* Main UI Styles */
@@ -123,9 +123,61 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
+
+        .text-overlay {
+            color: #ffffff !important;
+            text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.4);
+        }
+        .svg-overlay {
+            color: #ffffff !important;
+            filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.4));
+        }
+
+        /* Wheel specific */
+        .wheel-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 1;
+            border: 1px solid #e5e5e5;
+            background: radial-gradient(circle, transparent 40%, #f9f9f9 41%, transparent 42%, transparent 70%, #f9f9f9 71%, transparent 72%, transparent 98%, #e5e5e5 99%);
+        }
+        .wheel-axis {
+            position: absolute;
+            background-color: #f0f0f0;
+        }
+        .wheel-node {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, z-index 0s;
+            cursor: pointer;
+        }
+        .wheel-node:hover, .wheel-node.active {
+            transform: translate(-50%, -50%) scale(2.5);
+            border: 1px solid #111111;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Contrast Picker Nodes */
+        .cp-node {
+            border: 1px solid transparent;
+            transition: border-color 0.1s;
+        }
+        .cp-node.active {
+            border: 2px solid #111111;
+            transform: scale(1.1);
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .cp-node:hover {
+            border-color: #111111;
+        }
+
     </style>
 </head>
-<body class="antialiased flex flex-col min-h-screen overflow-hidden"> <!-- Hidden until splash completes -->
+<body class="antialiased flex flex-col min-h-screen overflow-hidden"> 
 
     <!-- Splash Screen -->
     <div id="splash-screen" class="fixed inset-0 z-[9999] bg-[#fafafa] flex flex-col items-center justify-center">
@@ -137,7 +189,7 @@
     </div>
 
     <!-- Header -->
-    <header class="pt-12 pb-10 px-4 md:pt-16 md:pb-12 md:px-8 w-full border-b border-zinc-200 bg-white">
+    <header class="pt-12 pb-10 px-4 md:pt-16 md:pb-12 md:px-8 w-full border-b border-zinc-200 bg-white shrink-0">
         <div class="max-w-7xl mx-auto flex flex-col xl:flex-row justify-between items-start gap-8">
             <div class="flex-1">
                 <h1 class="text-3xl md:text-5xl font-medium tracking-tight mb-3">
@@ -152,23 +204,24 @@
     </header>
 
     <!-- Navigation / Filters / Search -->
-    <nav class="sticky top-0 z-40 sticky-nav py-4 px-4 md:px-8 mb-8">
-        <div class="max-w-7xl mx-auto flex flex-col gap-6">
+    <nav class="sticky top-0 z-40 sticky-nav py-4 px-4 md:px-8 mb-6 shrink-0">
+        <div class="max-w-7xl mx-auto flex flex-col gap-5">
             
             <!-- View Tabs -->
             <div class="flex gap-6 border-b border-zinc-200 w-full overflow-x-auto hide-scrollbar pt-1">
                 <button onclick="switchView('combinations')" id="tab-combinations" class="view-tab active pb-3 text-xs uppercase tracking-widest font-medium whitespace-nowrap">Combinations</button>
                 <button onclick="switchView('colors')" id="tab-colors" class="view-tab pb-3 text-xs uppercase tracking-widest font-medium whitespace-nowrap">Individual Colors</button>
+                <button onclick="switchView('wheel')" id="tab-wheel" class="view-tab pb-3 text-xs uppercase tracking-widest font-medium whitespace-nowrap">Wheel</button>
+                <button onclick="switchView('contrast')" id="tab-contrast" class="view-tab pb-3 text-xs uppercase tracking-widest font-medium whitespace-nowrap">Contrast</button>
                 <button onclick="switchView('favorites')" id="tab-favorites" class="view-tab pb-3 text-xs uppercase tracking-widest font-medium whitespace-nowrap flex items-center gap-2">
                     Favorites <span id="fav-badge" class="bg-zinc-100 text-zinc-500 px-1.5 py-0.5 text-[9px] border border-zinc-200 leading-none">0</span>
                 </button>
             </div>
 
-            <!-- Controls (Filters, Format, Search) -->
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            <!-- Controls (Filters, Format, Search) - Only visible in grid views -->
+            <div id="grid-controls" class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                 <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto">
                     
-                    <!-- Filters (Hidden in Colors view) -->
                     <div id="combination-filters" class="flex gap-2 w-full sm:w-auto overflow-x-auto hide-scrollbar">
                         <button onclick="filterType('all')" id="btn-all" class="sharp-btn active filter-btn flex-1 sm:flex-none px-4 py-2 text-xs uppercase tracking-widest">All</button>
                         <button onclick="filterType('2')" id="btn-2" class="sharp-btn filter-btn flex-1 sm:flex-none px-4 py-2 text-xs uppercase tracking-widest">2-Color</button>
@@ -176,14 +229,12 @@
                         <button onclick="filterType('4')" id="btn-4" class="sharp-btn filter-btn flex-1 sm:flex-none px-4 py-2 text-xs uppercase tracking-widest">4-Color</button>
                     </div>
 
-                    <!-- Format Switcher -->
                     <div class="flex gap-2 w-full sm:w-auto shrink-0">
                         <button onclick="setFormat('hex')" id="fmt-hex" class="sharp-btn active format-btn flex-1 sm:flex-none px-3 py-2 text-[10px] uppercase tracking-widest">Hex</button>
                         <button onclick="setFormat('rgb')" id="fmt-rgb" class="sharp-btn format-btn flex-1 sm:flex-none px-3 py-2 text-[10px] uppercase tracking-widest">RGB</button>
                         <button onclick="setFormat('cmyk')" id="fmt-cmyk" class="sharp-btn format-btn flex-1 sm:flex-none px-3 py-2 text-[10px] uppercase tracking-widest">CMYK</button>
                     </div>
                     
-                    <!-- Search Box -->
                     <div class="relative w-full sm:w-64">
                         <input type="text" id="search-bar" oninput="handleSearch(this.value)" placeholder="SEARCH ID OR NAME" 
                                class="search-input w-full py-2 pl-9 pr-4 text-xs tracking-wide text-zinc-900 placeholder-zinc-400">
@@ -200,21 +251,118 @@
         </div>
     </nav>
 
-    <!-- Main Grid -->
-    <main id="main-grid" class="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pb-20">
-        <!-- JS will populate cards here -->
+    <!-- Main Views Container -->
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 pb-20 flex flex-col">
+        
+        <!-- View 1: Grid (Combinations, Colors, Favorites) -->
+        <div id="view-grid" class="w-full">
+            <div id="main-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"></div>
+            <div id="empty-state" class="hidden text-center py-24 w-full">
+                <div class="text-zinc-300 mb-6 flex justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+                </div>
+                <p class="text-zinc-500 font-light text-lg tracking-wide" id="empty-message">No results found.</p>
+            </div>
+        </div>
+
+        <!-- View 2: Color Wheel -->
+        <div id="view-wheel" class="hidden w-full flex-col lg:flex-row gap-8 lg:gap-12 items-start">
+            <div class="w-full lg:w-1/2 flex justify-center border border-zinc-200 bg-white p-8">
+                <div id="wheel-plot" class="wheel-container">
+                    <!-- Crosshairs -->
+                    <div class="wheel-axis w-full h-[1px] top-1/2 left-0 -translate-y-1/2"></div>
+                    <div class="wheel-axis h-full w-[1px] left-1/2 top-0 -translate-x-1/2"></div>
+                    <!-- Nodes injected here -->
+                </div>
+            </div>
+            <div class="w-full lg:w-1/2 flex flex-col gap-8 h-full min-h-[500px]">
+                <div class="border border-zinc-200 bg-white p-6 md:p-10 flex-1 flex flex-col relative" id="wheel-primary-card">
+                    <span class="text-[10px] uppercase tracking-widest text-zinc-500 mb-4 block">Selected Hue</span>
+                    <h2 id="wheel-jp" class="text-4xl md:text-5xl font-medium tracking-tight mb-2 leading-none">--</h2>
+                    <p id="wheel-en" class="text-xs uppercase tracking-widest font-medium opacity-80 mb-6">--</p>
+                    <div id="wheel-code" class="text-xs font-mono tracking-widest uppercase opacity-60 mb-auto">--</div>
+                    
+                    <!-- Color Swatch background applied to absolute inset behind text? No, keep it clean. Color is shown in a block below -->
+                    <div id="wheel-swatch" class="w-full h-32 border border-zinc-200 mt-8 transition-colors duration-300 cursor-pointer" onclick="openSelectedWheelColor()"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="border border-zinc-200 bg-white p-4 md:p-6 flex flex-col">
+                        <span class="text-[9px] uppercase tracking-widest text-zinc-400 mb-4 flex items-center gap-2">
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                            Complementary
+                        </span>
+                        <div id="wheel-comp-swatch" class="w-full h-16 border border-zinc-200 mb-3 cursor-pointer transition-transform hover:scale-105"></div>
+                        <span id="wheel-comp-jp" class="text-sm font-medium tracking-tight truncate">--</span>
+                        <span id="wheel-comp-en" class="text-[9px] uppercase tracking-widest opacity-60 truncate mt-1">--</span>
+                    </div>
+                    <div class="border border-zinc-200 bg-white p-4 md:p-6 flex flex-col">
+                        <span class="text-[9px] uppercase tracking-widest text-zinc-400 mb-4 flex items-center gap-2">
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                            Analogous
+                        </span>
+                        <div class="flex gap-2 mb-3">
+                            <div id="wheel-ana1-swatch" class="flex-1 h-16 border border-zinc-200 cursor-pointer transition-transform hover:scale-105"></div>
+                            <div id="wheel-ana2-swatch" class="flex-1 h-16 border border-zinc-200 cursor-pointer transition-transform hover:scale-105"></div>
+                        </div>
+                        <span class="text-sm font-medium tracking-tight truncate">Harmony matches</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 3: Contrast Checker -->
+        <div id="view-contrast" class="hidden w-full flex-col gap-6">
+            <div class="flex flex-col md:flex-row gap-6 h-auto md:h-[350px]">
+                <!-- Preview Canvas -->
+                <div id="contrast-preview" class="flex-1 flex flex-col items-center justify-center p-10 text-center border border-zinc-200 transition-colors duration-300 overflow-hidden relative">
+                    <div class="absolute top-4 left-4 text-[9px] uppercase tracking-widest opacity-50 border border-current px-1.5">Preview</div>
+                    <h2 class="text-4xl md:text-5xl font-medium tracking-tight mb-4">Aero Dynamics</h2>
+                    <p class="text-sm md:text-base font-light max-w-md leading-relaxed opacity-90">The quick brown fox jumps over the lazy dog. A visual perception test combining traditional palettes.</p>
+                </div>
+                <!-- Score Card -->
+                <div class="w-full md:w-64 lg:w-80 flex flex-col border border-zinc-200 bg-white p-6 shrink-0 h-[350px]">
+                    <div class="text-[10px] uppercase tracking-widest text-zinc-500 mb-2">Contrast Ratio</div>
+                    <div id="contrast-ratio" class="text-5xl md:text-6xl font-light tracking-tighter mb-auto">1.00:1</div>
+                    
+                    <div class="space-y-3 mt-6">
+                        <div class="flex justify-between items-center border-b border-zinc-100 pb-2">
+                            <span class="text-[10px] uppercase tracking-widest text-zinc-500">AA Normal</span>
+                            <span id="score-aa-n" class="text-xs font-bold uppercase tracking-widest">--</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-zinc-100 pb-2">
+                            <span class="text-[10px] uppercase tracking-widest text-zinc-500">AA Large</span>
+                            <span id="score-aa-l" class="text-xs font-bold uppercase tracking-widest">--</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-zinc-100 pb-2">
+                            <span class="text-[10px] uppercase tracking-widest text-zinc-500">AAA Normal</span>
+                            <span id="score-aaa-n" class="text-xs font-bold uppercase tracking-widest">--</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] uppercase tracking-widest text-zinc-500">AAA Large</span>
+                            <span id="score-aaa-l" class="text-xs font-bold uppercase tracking-widest">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selectors -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-[400px]">
+                <div class="flex flex-col border border-zinc-200 bg-white h-full overflow-hidden">
+                    <div class="text-[10px] uppercase tracking-widest text-zinc-500 p-4 border-b border-zinc-200 bg-zinc-50 shrink-0">Foreground (Text)</div>
+                    <div class="overflow-y-auto p-4 grid grid-cols-6 sm:grid-cols-8 md:grid-cols-6 lg:grid-cols-8 gap-2 content-start" id="fg-picker"></div>
+                </div>
+                <div class="flex flex-col border border-zinc-200 bg-white h-full overflow-hidden">
+                    <div class="text-[10px] uppercase tracking-widest text-zinc-500 p-4 border-b border-zinc-200 bg-zinc-50 shrink-0">Background</div>
+                    <div class="overflow-y-auto p-4 grid grid-cols-6 sm:grid-cols-8 md:grid-cols-6 lg:grid-cols-8 gap-2 content-start" id="bg-picker"></div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
-    <!-- Empty State -->
-    <div id="empty-state" class="hidden flex-1 text-center py-24 px-4 w-full">
-        <div class="text-zinc-300 mb-6 flex justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
-        </div>
-        <p class="text-zinc-500 font-light text-lg tracking-wide" id="empty-message">No results found.</p>
-    </div>
-
     <!-- Footer -->
-    <footer class="mt-auto border-t border-zinc-200 py-8 bg-white">
+    <footer class="mt-auto border-t border-zinc-200 py-8 bg-white shrink-0">
         <div class="max-w-7xl mx-auto px-6 text-center">
             <p class="text-zinc-400 font-light text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
                 ABINESH <span class="inline-block w-1.5 h-1.5 bg-zinc-300 rounded-full"></span> 2026
@@ -425,46 +573,45 @@
             COMBINATIONS.push({ id: i.toString().padStart(3, '0'), colors: colorIds, type });
         }
 
-        // Migration step
-        let rawFavs = JSON.parse(localStorage.getItem('wada-favs') || '[]');
-        let favorites = rawFavs.map(id => typeof id === 'string' && !id.includes('-') ? 'comb-' + id : id);
-        localStorage.setItem('wada-favs', JSON.stringify(favorites));
-
-        // Global State
-        let currentView = 'combinations'; 
-        let currentType = 'all'; 
-        let currentSearch = '';
-        let currentFormat = 'hex'; 
-        let overlayHistory = [];
-
-        // DOM Elements
-        const grid = document.getElementById('main-grid');
-        const emptyState = document.getElementById('empty-state');
-        const emptyMessage = document.getElementById('empty-message');
-        const countSpan = document.getElementById('visible-count');
-        const toast = document.getElementById('toast');
-        const overlay = document.getElementById('fullscreen-overlay');
-        const favBadge = document.getElementById('fav-badge');
-
-        function init() {
-            updateFavBadge();
-            render();
+        // Color Math Utilities
+        function rgbToHsl(r, g, b) {
+            r /= 255, g /= 255, b /= 255;
+            let max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            if (max === min) {
+                h = s = 0; 
+            } else {
+                let d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return [h * 360, s * 100, l * 100];
         }
 
-        function showToast(text) {
-            toast.innerText = text;
-            toast.style.opacity = '1';
-            setTimeout(() => toast.style.opacity = '0', 2000);
+        function getLuminance(r, g, b) {
+            let [rs, gs, bs] = [r/255, g/255, b/255].map(c => {
+                return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            });
+            return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
         }
 
-        function copyToClipboard(str) {
-            const el = document.createElement('textarea');
-            el.value = str;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            showToast(`COPIED: ${str}`);
+        function getContrastRatio(rgb1, rgb2) {
+            let l1 = getLuminance(...rgb1);
+            let l2 = getLuminance(...rgb2);
+            let lightest = Math.max(l1, l2);
+            let darkest = Math.min(l1, l2);
+            return (lightest + 0.05) / (darkest + 0.05);
+        }
+
+        function getContrastYIQ(rgb) {
+            const [r, g, b] = rgb;
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return (yiq >= 128) ? '#111111' : '#ffffff'; 
         }
 
         function getFormattedColor(rgb, format) {
@@ -483,10 +630,88 @@
             }
         }
 
-        function getContrastYIQ(rgb) {
-            const [r, g, b] = rgb;
-            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-            return (yiq >= 128) ? '#111111' : '#ffffff'; 
+        function findClosestColor(targetH, targetS, targetL, excludeId = null) {
+            let bestMatch = null;
+            let minDistance = Infinity;
+
+            Object.values(COLORS).forEach(c => {
+                if(c.id === excludeId) return;
+                
+                let dh = Math.min(Math.abs(c.h - targetH), 360 - Math.abs(c.h - targetH)) / 180.0;
+                let ds = Math.abs(c.s - targetS) / 100.0;
+                let dl = Math.abs(c.l - targetL) / 100.0;
+
+                // Weight Hue heavily for color harmonies
+                let distance = Math.sqrt((dh * dh * 2) + (ds * ds) + (dl * dl));
+                
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    bestMatch = c;
+                }
+            });
+            return bestMatch;
+        }
+
+        // Initialize extended color data
+        Object.values(COLORS).forEach(c => {
+            let hsl = rgbToHsl(...c.rgb);
+            c.h = hsl[0];
+            c.s = hsl[1];
+            c.l = hsl[2];
+        });
+
+        // Migration step
+        let rawFavs = JSON.parse(localStorage.getItem('wada-favs') || '[]');
+        let favorites = rawFavs.map(id => typeof id === 'string' && !id.includes('-') ? 'comb-' + id : id);
+        localStorage.setItem('wada-favs', JSON.stringify(favorites));
+
+        // Global State
+        let currentView = 'combinations'; // 'combinations', 'colors', 'wheel', 'contrast', 'favorites'
+        let currentType = 'all'; 
+        let currentSearch = '';
+        let currentFormat = 'hex'; 
+        let overlayHistory = [];
+
+        // Contrast State
+        let contrastFgId = '072'; // Black
+        let contrastBgId = '080'; // White
+        
+        // Wheel State
+        let activeWheelColorId = '001';
+
+        // DOM Elements
+        const gridWrapper = document.getElementById('view-grid');
+        const wheelWrapper = document.getElementById('view-wheel');
+        const contrastWrapper = document.getElementById('view-contrast');
+        const gridControls = document.getElementById('grid-controls');
+        
+        const grid = document.getElementById('main-grid');
+        const emptyState = document.getElementById('empty-state');
+        const emptyMessage = document.getElementById('empty-message');
+        const countSpan = document.getElementById('visible-count');
+        const toast = document.getElementById('toast');
+        const overlay = document.getElementById('fullscreen-overlay');
+        const favBadge = document.getElementById('fav-badge');
+
+        function init() {
+            updateFavBadge();
+            switchView(currentView);
+        }
+
+        function showToast(text) {
+            toast.innerText = text;
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 2000);
+        }
+
+        function copyToClipboard(str) {
+            const el = document.createElement('textarea');
+            el.value = str;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast(`COPIED: ${str}`);
         }
 
         function toggleFavorite(type, id, event) {
@@ -502,7 +727,7 @@
             }
             localStorage.setItem('wada-favs', JSON.stringify(favorites));
             updateFavBadge();
-            render();
+            renderGrid();
             if(overlayHistory.length > 0) renderOverlay(); 
         }
 
@@ -512,46 +737,66 @@
 
         function switchView(view) {
             currentView = view;
-            document.querySelectorAll('.view-tab').forEach(t => {
-                t.classList.remove('active');
-            });
-            const activeTab = document.getElementById(`tab-${view}`);
-            activeTab.classList.add('active');
+            
+            // UI Tabs updates
+            document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${view}`).classList.add('active');
 
             const filterGroup = document.getElementById('combination-filters');
-            if(view === 'colors') {
+            if(view === 'colors' || view === 'wheel' || view === 'contrast') {
                 filterGroup.classList.add('hidden');
             } else {
                 filterGroup.classList.remove('hidden');
             }
-            render();
+
+            // Route Logic
+            gridWrapper.classList.add('hidden');
+            wheelWrapper.classList.add('hidden');
+            wheelWrapper.classList.remove('flex');
+            contrastWrapper.classList.add('hidden');
+            contrastWrapper.classList.remove('flex');
+            gridControls.classList.add('hidden');
+
+            if (view === 'combinations' || view === 'colors' || view === 'favorites') {
+                gridWrapper.classList.remove('hidden');
+                gridControls.classList.remove('hidden');
+                gridControls.classList.add('flex');
+                renderGrid();
+            } else if (view === 'wheel') {
+                wheelWrapper.classList.remove('hidden');
+                wheelWrapper.classList.add('flex');
+                renderWheelView();
+            } else if (view === 'contrast') {
+                contrastWrapper.classList.remove('hidden');
+                contrastWrapper.classList.add('flex');
+                renderContrastView();
+            }
         }
 
         function filterType(typeStr) {
             currentType = String(typeStr);
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             const activeBtn = document.getElementById(`btn-${currentType}`);
-            if (activeBtn) {
-                activeBtn.classList.add('active');
-            }
-            render();
+            if (activeBtn) activeBtn.classList.add('active');
+            renderGrid();
         }
 
         function setFormat(format) {
             currentFormat = format;
             document.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`fmt-${format}`).classList.add('active');
-            render();
+            
+            if (currentView === 'combinations' || currentView === 'colors' || currentView === 'favorites') renderGrid();
+            if (currentView === 'wheel') renderWheelView();
             if(overlayHistory.length > 0) renderOverlay();
         }
 
         function handleSearch(val) {
             currentSearch = val.toLowerCase().trim();
-            render();
+            renderGrid();
         }
 
+        // --- View 1: Grid Logic ---
         function createColorCard(c) {
             const isFav = favorites.includes('color-' + c.id);
             const codeValue = getFormattedColor(c.rgb, currentFormat);
@@ -644,7 +889,7 @@
             return card;
         }
 
-        function render() {
+        function renderGrid() {
             grid.innerHTML = '';
             let renderedCount = 0;
 
@@ -698,6 +943,144 @@
             }
         }
 
+
+        // --- View 2: Wheel Logic ---
+        function renderWheelView() {
+            const plot = document.getElementById('wheel-plot');
+            // Clean up existing nodes, keep axes
+            plot.innerHTML = `
+                <div class="wheel-axis w-full h-[1px] top-1/2 left-0 -translate-y-1/2"></div>
+                <div class="wheel-axis h-full w-[1px] left-1/2 top-0 -translate-x-1/2"></div>
+            `;
+
+            Object.values(COLORS).forEach(c => {
+                let angle = (c.h - 90) * (Math.PI / 180);
+                let radiusPct = c.s * 0.45; // limit to 45% radius so it fits nicely
+                let left = 50 + (radiusPct * Math.cos(angle));
+                let top = 50 + (radiusPct * Math.sin(angle));
+
+                let node = document.createElement('div');
+                node.className = `wheel-node w-3 h-3 ${c.id === activeWheelColorId ? 'active' : ''}`;
+                node.style.backgroundColor = `rgb(${c.rgb.join(',')})`;
+                node.style.left = `${left}%`;
+                node.style.top = `${top}%`;
+                node.title = `${c.jp} / ${c.en}`;
+                node.onclick = () => selectWheelColor(c.id);
+
+                plot.appendChild(node);
+            });
+
+            updateWheelDetails();
+        }
+
+        function selectWheelColor(id) {
+            activeWheelColorId = id;
+            renderWheelView(); // Re-render to update active classes
+        }
+
+        function updateWheelDetails() {
+            const c = COLORS[activeWheelColorId];
+            if(!c) return;
+
+            const tc = getContrastYIQ(c.rgb);
+            
+            document.getElementById('wheel-jp').innerText = c.jp;
+            document.getElementById('wheel-en').innerText = c.en;
+            document.getElementById('wheel-code').innerText = getFormattedColor(c.rgb, currentFormat);
+            
+            const swatch = document.getElementById('wheel-swatch');
+            swatch.style.backgroundColor = `rgb(${c.rgb.join(',')})`;
+
+            // Find harmonies within Wada dictionary
+            const comp = findClosestColor((c.h + 180) % 360, c.s, c.l, c.id);
+            const ana1 = findClosestColor((c.h + 30) % 360, c.s, c.l, c.id);
+            const ana2 = findClosestColor((c.h - 30 + 360) % 360, c.s, c.l, c.id);
+
+            const updateSubSwatch = (id, elId) => {
+                if(!id) return;
+                const sw = document.getElementById(elId);
+                const color = COLORS[id];
+                sw.style.backgroundColor = `rgb(${color.rgb.join(',')})`;
+                sw.onclick = () => selectWheelColor(id);
+            };
+
+            updateSubSwatch(comp?.id, 'wheel-comp-swatch');
+            document.getElementById('wheel-comp-jp').innerText = comp?.jp || '--';
+            document.getElementById('wheel-comp-en').innerText = comp?.en || '--';
+            
+            updateSubSwatch(ana1?.id, 'wheel-ana1-swatch');
+            updateSubSwatch(ana2?.id, 'wheel-ana2-swatch');
+        }
+
+        function openSelectedWheelColor() {
+            if(activeWheelColorId) openColorOverlay(activeWheelColorId);
+        }
+
+
+        // --- View 3: Contrast Logic ---
+        function renderContrastView() {
+            // Setup Pickers if empty
+            const fgPicker = document.getElementById('fg-picker');
+            const bgPicker = document.getElementById('bg-picker');
+            
+            if(fgPicker.children.length === 0) {
+                Object.values(COLORS).forEach(c => {
+                    const makeNode = (id, type) => {
+                        let node = document.createElement('div');
+                        node.className = `cp-node w-full aspect-square cursor-pointer ${type === 'fg' && id === contrastFgId ? 'active' : ''} ${type === 'bg' && id === contrastBgId ? 'active' : ''}`;
+                        node.style.backgroundColor = `rgb(${c.rgb.join(',')})`;
+                        node.title = `${c.jp} (${c.en})`;
+                        node.onclick = () => setContrastColor(type, id);
+                        return node;
+                    };
+                    fgPicker.appendChild(makeNode(c.id, 'fg'));
+                    bgPicker.appendChild(makeNode(c.id, 'bg'));
+                });
+            } else {
+                // Update active states
+                Array.from(fgPicker.children).forEach((node, idx) => {
+                    const c = Object.values(COLORS)[idx];
+                    node.className = `cp-node w-full aspect-square cursor-pointer ${c.id === contrastFgId ? 'active' : ''}`;
+                });
+                Array.from(bgPicker.children).forEach((node, idx) => {
+                    const c = Object.values(COLORS)[idx];
+                    node.className = `cp-node w-full aspect-square cursor-pointer ${c.id === contrastBgId ? 'active' : ''}`;
+                });
+            }
+
+            updateContrastScores();
+        }
+
+        function setContrastColor(type, id) {
+            if (type === 'fg') contrastFgId = id;
+            if (type === 'bg') contrastBgId = id;
+            renderContrastView();
+        }
+
+        function updateContrastScores() {
+            const fg = COLORS[contrastFgId];
+            const bg = COLORS[contrastBgId];
+
+            const preview = document.getElementById('contrast-preview');
+            preview.style.backgroundColor = `rgb(${bg.rgb.join(',')})`;
+            preview.style.color = `rgb(${fg.rgb.join(',')})`;
+            preview.style.borderColor = getContrastYIQ(bg.rgb) === '#ffffff' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)';
+
+            const ratio = getContrastRatio(fg.rgb, bg.rgb);
+            document.getElementById('contrast-ratio').innerText = ratio.toFixed(2) + ':1';
+
+            const evalWCAG = (val, threshold) => {
+                return val >= threshold 
+                    ? `<span class="text-green-600">PASS</span>` 
+                    : `<span class="text-zinc-400 line-through">FAIL</span>`;
+            };
+
+            document.getElementById('score-aa-n').innerHTML = evalWCAG(ratio, 4.5);
+            document.getElementById('score-aa-l').innerHTML = evalWCAG(ratio, 3.0);
+            document.getElementById('score-aaa-n').innerHTML = evalWCAG(ratio, 7.0);
+            document.getElementById('score-aaa-l').innerHTML = evalWCAG(ratio, 4.5);
+        }
+
         // --- Fullscreen Overlay Logic ---
         function openColorOverlay(cid) {
             overlayHistory.push({ type: 'color', id: cid });
@@ -721,7 +1104,7 @@
         function closeOverlay() {
             overlayHistory = [];
             overlay.classList.add('opacity-0', 'pointer-events-none');
-            overlay.classList.remove('opacity-100');
+            overlay.classList.remove('opacity-100', 'swatch-overlay-enter');
             setTimeout(() => {
                 overlay.classList.add('hidden');
                 document.body.style.overflow = '';
@@ -737,7 +1120,8 @@
             
             requestAnimationFrame(() => {
                 overlay.classList.remove('opacity-0', 'pointer-events-none');
-                overlay.classList.add('opacity-100', 'swatch-overlay-enter');
+                if(overlayHistory.length === 1) overlay.classList.add('opacity-100', 'swatch-overlay-enter');
+                else overlay.classList.add('opacity-100'); // No re-entry anim on back/forward
             });
 
             if (current.type === 'color') {
@@ -751,7 +1135,7 @@
                 let combsHtml = relatedCombs.map(comb => `
                     <button onclick="openCombinationOverlay('${comb.id}')" class="flex flex-col h-28 border transition-colors text-left group bg-transparent w-full" style="border-color: ${textColor}30;">
                         <div class="w-full flex justify-between p-2 shrink-0">
-                            <span class="text-[9px] uppercase tracking-widest" style="color: ${textColor}; opacity: 0.8;">NO. ${comb.id}</span>
+                            <span class="text-[9px] font-bold uppercase tracking-widest" style="color: ${textColor}; opacity: 0.8;">NO. ${comb.id}</span>
                         </div>
                         <div class="flex flex-1 w-full pb-2 px-2 gap-0.5">
                             ${comb.colors.map(colorId => `<div class="flex-1 h-full" style="background-color: rgb(${COLORS[colorId].rgb.join(',')});"></div>`).join('')}
@@ -805,7 +1189,6 @@
                 const comb = COMBINATIONS.find(c => c.id === current.id);
                 const isFav = favorites.includes('comb-' + comb.id);
                 
-                // For responsive navigation text colors based on the top color bar
                 const firstColorId = comb.colors[0];
                 const lastColorId = comb.colors[comb.colors.length - 1];
                 const firstTextColor = getContrastYIQ(COLORS[firstColorId].rgb);
@@ -824,8 +1207,6 @@
                     </div>`;
                 }).join('');
                 
-                // Setup inline style to handle responsive contrast for the right nav buttons.
-                // On mobile (flex-col), right buttons sit on the first color. On desktop (flex-row), they sit on the last color.
                 const styleBlock = `
                     <style>
                         :root {
@@ -876,5 +1257,3 @@
     </script>
 </body>
 </html>
-
-
